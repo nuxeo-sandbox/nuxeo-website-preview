@@ -13,6 +13,12 @@
   <name>nuxeo-website-preview-plugin</name>
   <description/>
   <dependencies>
+    <!-- We depend on fsexporter -->
+    <dependency>
+      <groupId>org.nuxeo.io</groupId>
+      <artifactId>nuxeo-fsexporter</artifactId>
+      <version>7.4-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.nuxeo.common</groupId>
       <artifactId>nuxeo-common</artifactId>
@@ -40,6 +46,22 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.seam</groupId>
+      <artifactId>jboss-seam</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.nuxeo.ecm.platform</groupId>
+      <artifactId>nuxeo-platform-ui-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
     </dependency>
   </dependencies>
   <build>

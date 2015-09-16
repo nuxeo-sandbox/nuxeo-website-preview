@@ -7,4 +7,4 @@ Bundle-Vendor: Nuxeo
 Bundle-Version: 1.0.qualifier
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: nuxeo-plugintemplate
-Nuxeo-Component: OSGI-INF/plugintemplate.xml
+Nuxeo-Component: OSGI-INF/website-preview-contrib.xml
