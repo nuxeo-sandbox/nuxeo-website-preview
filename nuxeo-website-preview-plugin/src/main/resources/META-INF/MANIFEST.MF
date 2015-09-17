@@ -1,10 +1,11 @@
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Manifest-Version: 1.0
-Bundle-Name: nuxeo-plugintemplate
+Bundle-Name: nuxeo-website-preview
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: Nuxeo
 Bundle-Version: 1.0.qualifier
 Bundle-ManifestVersion: 2
-Bundle-SymbolicName: nuxeo-plugintemplate
+Bundle-SymbolicName: nuxeo-website-preview
 Nuxeo-Component: OSGI-INF/website-preview-contrib.xml
+Nuxeo-WebModule: org.nuxeo.ecm.webengine.app.WebEngineModule;name=WSP;extends=base;package=org/nuxeo/website/preview
