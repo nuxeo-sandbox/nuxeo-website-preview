@@ -11,6 +11,24 @@ It assumes the current document:
   * One single .html file
   * Or, if several, one whose name is `index.html`
 
+If the folder contains several Document whose blobs are html files, it returns one of them (arbitrary), so it is likely the site will not work correctly in this case.
+
+## Good to Know
+* it is a _preview_ of the html and its related resources: Related links will all request a resource from the nuxeo server. It is ok for any resurce stored in the correct folder/subfolder, but links will not work with custom and dynamic URLS.
+
+* This works using a _WebEngine_ module whose name in the URLs is `WSP` (**W**eb**S**ite**P**review). Which means the url.
+
+* Also, to be a bit more user friendly, the main url must ends with `index.html`, _whatever_ the real name of your main html file.
+
+* So, to access the preview(*), the URL to use is:
+
+    `{server:port}/nuxeo/site/WSP/main-parent-doc-id/index.html`
+
+For example, say you have a _Folderish_ document, named "My Site", whose `id` is `1234-5678-9ABC-DEF0`, a,nd you are testing on your localhost, you can display the preview using this URL: `http://localhost:8080/nuxeo/site/1234-5678-9ABC-DEF0/index.html`
+
+(*) Assuming vcurrent user is logged in and has enough rights to at least _read_ the blobs), or is anonymous and you allowed anonymous users and setup the permissions, etc. etc.
+
+
 
 ## Usage
 
