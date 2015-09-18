@@ -22,6 +22,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
@@ -31,9 +33,16 @@ import org.nuxeo.ecm.core.api.IdRef;
 import org.nuxeo.ecm.core.api.model.PropertyException;
 
 /**
- * @since TODO
+ * @since 7.3
  */
 public class WebsitePreviewUtils {
+
+    private static final Log log = LogFactory.getLog(WebsitePreviewUtils.class);
+
+    protected static int MAX_ELEMENTS_IN_CACHE = 500;
+
+    // Caching, to avoid doing too many NXQL.
+    protected static LinkedHashMap<String, DocumentModel> parentIdAndMainHtml = new LinkedHashMap<String, DocumentModel>();
 
     /**
      * Receives a <i>Folderish</i> document, which contains at least one Document whose file:content field is an html
@@ -62,35 +71,66 @@ public class WebsitePreviewUtils {
     public static DocumentModel getMainHtmlDocument(CoreSession session, DocumentModel parent) {
 
         DocumentModel mainHtml = null;
-
         if (parent != null && parent.hasFacet("Folderish")) {
 
-            // Must find a .html file in first children
-            String nxql = "SELECT * FROM Document WHERE ecm:parentId = '"
-                    + parent.getId()
-                    + "'"
-                    + " AND (content/mime-type ILIKE '%html' OR content/name ILIKE '%html%' OR content/name ILIKE '%hml')"
-                    + " AND ecm:mixinType != 'HiddenInNavigation' AND ecm:isProxy = 0 AND ecm:isCheckedInVersion = 0 AND ecm:currentLifeCycleState != 'deleted'";
-            DocumentModelList children = session.query(nxql);
+            mainHtml = parentIdAndMainHtml.get(parent.getId());
 
-            String fileName;
-            Blob mainBlob;
-            for (DocumentModel child : children) {
+            if (mainHtml != null) {
+                mainHtml.refresh();
+            } else {
+                // Must protect writing in shared array, to save cpu when getting the same html from different threads
+                synchronized (parentIdAndMainHtml) {
+                    // Another thread could have done the exact same thing right when setting the MutEx => we must check
+                    // again
+                    mainHtml = parentIdAndMainHtml.get(parent.getId());
+                    if (mainHtml == null) {
+                        // Must find a .html file in first children
+                        String nxql = "SELECT * FROM Document WHERE ecm:parentId = '"
+                                + parent.getId()
+                                + "'"
+                                + " AND (content/mime-type ILIKE '%html' OR content/name ILIKE '%html%' OR content/name ILIKE '%hml')"
+                                + " AND ecm:mixinType != 'HiddenInNavigation' AND ecm:isProxy = 0 AND ecm:isCheckedInVersion = 0 AND ecm:currentLifeCycleState != 'deleted'";
+                        DocumentModelList children = session.query(nxql);
 
-                mainHtml = child;
-                
-                // Because of the nxql we did, we know the document has a blob, and the html mime type, no need to
-                // try-catch or check things
-                // (we could be hysterical: Maybe in the microseconds, the document has been removed or it's permissions
-                // changed... The error will then be thrown and that's all.
-                mainBlob = (Blob) child.getPropertyValue("file:content");
-                fileName = mainBlob.getFilename();
-                if (mainHtml != null && fileName.toLowerCase().indexOf("index.html") == 0) {
-                    break;
+                        if (children.size() == 1) {
+                            mainHtml = children.get(0);
+                        } else {
+                            String fileName;
+                            Blob mainBlob;
+                            for (DocumentModel child : children) {
+
+                                mainHtml = child;
+                                /*
+                                 * Because of the nxql we did, we know the document has a blob, and the html mime type,
+                                 * no need to try-catch or check things (we could be hysterical: Maybe in the
+                                 * microseconds, the document has been removed or it's permissions changed... The error
+                                 * will then be thrown and that's all.
+                                 */
+                                mainBlob = (Blob) child.getPropertyValue("file:content");
+                                fileName = mainBlob.getFilename();
+                                if (mainHtml != null && fileName.toLowerCase().indexOf("index.html") == 0) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (mainHtml != null) {
+                        parentIdAndMainHtml.put(parent.getId(), mainHtml);
+                    }
                 }
             }
         }
 
         return mainHtml;
     }
+
+    public static int getMaxElementsInCache() {
+        return MAX_ELEMENTS_IN_CACHE;
+    }
+
+    public static void setMaxElementsInCache(int value) {
+        MAX_ELEMENTS_IN_CACHE = value <= 10 ? 50 : value;
+    }
+    
+    
 }

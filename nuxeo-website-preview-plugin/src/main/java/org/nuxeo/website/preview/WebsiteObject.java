@@ -12,7 +12,7 @@
  * Lesser General Public License for more details.
  *
  * Contributors:
- *     thibaud
+ *     Thibaud Arguillere
  */
 package org.nuxeo.website.preview;
 
@@ -27,20 +27,19 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.ecm.core.api.Blob;
-import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.IdRef;
 import org.nuxeo.ecm.core.api.PathRef;
-import org.nuxeo.ecm.core.rest.DocumentObject;
 import org.nuxeo.ecm.webengine.model.WebObject;
 import org.nuxeo.ecm.webengine.model.impl.DefaultObject;
 
 /*
- * TODO: Using Exception because we are in 7.3 and ClientException is deprecated starting at 7.4 => Somebody will have
+ * TODO: Using the generic Exception because we are in 7.3 and ClientException is deprecated starting at 7.4 => Somebody will have
  * to adapt the Exception handling
  */
 
 /**
+ * 
  * @since 7.3
  */
 @WebObject(type = "Website")
@@ -105,36 +104,28 @@ public class WebsiteObject extends DefaultObject {
      * Here, we receive "img01.jpg", or "/img/img01.jpg", etc.
      */
     /*
-     * WARNING WARNING: In this example, we assume the path received is the same as the path in nuxeo, while we should
-     * rebuild-it, by comparing each subpath to the Blob's file name, and getting the "real" Nuxeo ptah. Maybe this culd
-     * be done only in case of error.
+     * WARNING WARNING: We assume the path received is the same as the path in nuxeo. We can't handle file renamed etc.
      */
     @Path("{thePath:.*}")
     @GET
     public Response getResource(@PathParam("thePath") String thePath) {
 
-        log.warn("thePath: " + thePath);
-
         Response r = null;
         if (mainFolder != null) {
             String path = mainFolder.getPathAsString() + "/" + thePath;
 
-            log.warn("    In Nuxeo: " + path);
-            
             DocumentModel doc = null;
             try {
                 doc = ctx.getCoreSession().getDocument(new PathRef(path));
-                
+
                 Blob b = (Blob) doc.getPropertyValue("file:content");
                 ResponseBuilder resp = Response.ok(b.getFile());
-                
-                log.warn("    " + b.getMimeType());
-                
+
                 resp.type(b.getMimeType());
                 r = resp.build();
-                
+
             } catch (Exception e) {
-                // This is where we try to rebuild a nuxeo path
+                // This is where we try to rebuild a nuxeo path?
             }
 
         }
