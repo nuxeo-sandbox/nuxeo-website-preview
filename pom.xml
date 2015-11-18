@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.nuxeo</groupId>
     <artifactId>nuxeo-addons-parent</artifactId>
-    <version>7.3</version>
+    <version>7.10-SNAPSHOT</version>
   </parent>
   <groupId>nuxeo-website-preview</groupId>
   <artifactId>nuxeo-website-preview-parent</artifactId>
   <name>Parent Project for Nuxeo Website Preview</name>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <description />
   <modules>
@@ -18,7 +18,7 @@
     <module>nuxeo-website-preview-mp</module>
   </modules>
   <properties>
-    <nuxeo.website-preview.version>1.0-SNAPSHOT</nuxeo.website-preview.version>
+    <nuxeo.website-preview.version>1.1-SNAPSHOT</nuxeo.website-preview.version>
   </properties>
   <dependencyManagement>
     <dependencies>

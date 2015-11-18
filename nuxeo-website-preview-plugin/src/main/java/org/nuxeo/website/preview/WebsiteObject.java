@@ -46,6 +46,7 @@ import org.nuxeo.ecm.webengine.model.impl.DefaultObject;
 @Produces("text/html;charset=UTF-8")
 public class WebsiteObject extends DefaultObject {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(WebsiteObject.class);
 
     // The main fodler, containing the files

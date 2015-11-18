@@ -33,6 +33,7 @@ import org.nuxeo.ecm.webengine.model.impl.ModuleRoot;
 @WebObject(type = "WebsitePreviewWE")
 public class WebsitePreviewWE extends ModuleRoot {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(WebsitePreviewWE.class);
 
     public static final String PREFIX_PATH = "/WSP";

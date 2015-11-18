@@ -1,7 +1,7 @@
 <package type="addon" name="nuxeo-website-preview" version="@VERSION@">
   <title>Nuxeo TO_BE_DONE</title>
   <description>
-    <p>This addon activates the Nuxeo TO_BE_DONE addon.</p>
+    <p>This addon activates the Nuxeo Website Preview addon.</p>
     <p>This addon adds new features as explained <a href="https://github.com/nuxeo-sandbox/nuxeo-website-preview">here</a></p>
   </description>
   <home-page>https://github.com/nuxeo-sandbox/nuxeo-website-preview</home-page>
@@ -14,8 +14,8 @@
   <production-state>development</production-state>
   <supported>false</supported>
   <platforms>
-    <platform>cap-7.3</platform>
     <platform>cap-7.4</platform>
+    <platform>cap-7.10</platform>
   </platforms>
 <!-- 
   <dependencies>

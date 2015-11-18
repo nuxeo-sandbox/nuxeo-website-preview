@@ -16,27 +16,21 @@
  */
 package org.nuxeo.website.preview;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.ecm.core.api.Blob;
-import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
-import org.nuxeo.ecm.core.api.IdRef;
-import org.nuxeo.ecm.core.api.model.PropertyException;
 
 /**
  * @since 7.3
  */
 public class WebsitePreviewUtils {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(WebsitePreviewUtils.class);
 
     protected static int MAX_ELEMENTS_IN_CACHE = 500;
