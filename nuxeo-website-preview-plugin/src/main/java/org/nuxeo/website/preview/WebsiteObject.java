@@ -33,11 +33,6 @@ import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.webengine.model.WebObject;
 import org.nuxeo.ecm.webengine.model.impl.DefaultObject;
 
-/*
- * TODO: Using the generic Exception because we are in 7.3 and ClientException is deprecated starting at 7.4 => Somebody will have
- * to adapt the Exception handling
- */
-
 /**
  * 
  * @since 7.3
