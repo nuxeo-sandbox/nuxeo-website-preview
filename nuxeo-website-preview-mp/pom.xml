@@ -5,7 +5,7 @@
   <parent>
     <groupId>nuxeo-website-preview</groupId>
     <artifactId>nuxeo-website-preview-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>8.3-SNAPSHOT</version>
   </parent>
   <groupId>nuxeo-website-preview</groupId>
   <artifactId>nuxeo-website-preview-mp</artifactId>
@@ -16,7 +16,6 @@
     <dependency>
       <groupId>nuxeo-website-preview</groupId>
       <artifactId>nuxeo-website-preview-plugin</artifactId>
-      <version>1.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
