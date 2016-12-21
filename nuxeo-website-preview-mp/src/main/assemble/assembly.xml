@@ -13,7 +13,7 @@
   </target>
 
   <target name="build" depends="init" description="Build Nuxeo Website Preview Package">
-    <echo>Building Nuxeo TO_BE_DONE Markeplace Package</echo>
+    <echo>Building Nuxeo WebsitePreview Markeplace Package</echo>
     <delete failonerror="false" dir="${marketplace}" />
     <mkdir dir="${marketplace}" />
 
