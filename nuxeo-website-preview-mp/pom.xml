@@ -5,7 +5,7 @@
   <parent>
     <groupId>nuxeo-website-preview</groupId>
     <artifactId>nuxeo-website-preview-parent</artifactId>
-    <version>8.10-SNAPSHOT</version>
+    <version>9.10-SNAPSHOT</version>
   </parent>
   <groupId>nuxeo-website-preview</groupId>
   <artifactId>nuxeo-website-preview-mp</artifactId>
@@ -13,21 +13,30 @@
   <name>Market Place Package for Nuxeo Website Preview</name>
   <description/>
   <dependencies>
+    <!-- Base distribution(s) for the MP -->
+    <dependency>
+      <groupId>org.nuxeo.ecm.distribution</groupId>
+      <artifactId>nuxeo-nxr-server</artifactId>
+      <type>zip</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Additional bundles to be deployed by the MP -->
     <dependency>
       <groupId>nuxeo-website-preview</groupId>
       <artifactId>nuxeo-website-preview-plugin</artifactId>
     </dependency>
   </dependencies>
+  
   <build>
     <plugins>
       <plugin>
         <groupId>org.nuxeo.build</groupId>
-        <!-- When building for 5.8 -->
-        <!-- <artifactId>nuxeo-distribution-tools</artifactId> -->
-        <!-- When building for 5.9.2+ -->
         <artifactId>ant-assembly-maven-plugin</artifactId>
         <configuration>
-          <buildFile>${basedir}/src/main/assemble/assembly.xml</buildFile>
+          <buildFiles>
+            <buildFile>${basedir}/src/main/assemble/assembly.xml</buildFile>
+          </buildFiles>
         </configuration>
       </plugin>
     </plugins>

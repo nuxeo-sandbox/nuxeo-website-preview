@@ -34,7 +34,7 @@ import org.nuxeo.ecm.webengine.model.WebObject;
 import org.nuxeo.ecm.webengine.model.impl.DefaultObject;
 
 /**
- * 
+ *
  * @since 7.3
  */
 @WebObject(type = "Website")
@@ -73,9 +73,13 @@ public class WebsiteObject extends DefaultObject {
                     r = Response.status(Status.NOT_FOUND).build();
                 } else {
                     try {
-                        Blob b = (Blob) doc.getPropertyValue("file:content");
-                        ResponseBuilder resp = Response.ok(b.getFile());
-                        r = resp.build();
+                        if(doc.hasSchema("file")) {
+                            Blob b = (Blob) doc.getPropertyValue("file:content");
+                            ResponseBuilder resp = Response.ok(b.getFile());
+                            r = resp.build();
+                        } else {
+                            r = Response.status(Status.NOT_FOUND).build();
+                        }
 
                     } catch (Exception e) {
                         r = Response.status(Status.NOT_FOUND).build();

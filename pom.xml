@@ -3,14 +3,14 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.nuxeo</groupId>
-    <artifactId>nuxeo-addons-parent</artifactId>
-    <version>8.10</version>
+    <groupId>org.nuxeo.ecm.distribution</groupId>
+    <artifactId>nuxeo-distribution</artifactId>
+    <version>9.10</version>
   </parent>
   <groupId>nuxeo-website-preview</groupId>
   <artifactId>nuxeo-website-preview-parent</artifactId>
   <name>Parent Project for Nuxeo Website Preview</name>
-  <version>8.10-SNAPSHOT</version>
+  <version>9.10-SNAPSHOT</version>
   <packaging>pom</packaging>
   <description />
   <modules>
@@ -18,7 +18,7 @@
     <module>nuxeo-website-preview-mp</module>
   </modules>
   <properties>
-    <nuxeo.website-preview.version>8.10-SNAPSHOT</nuxeo.website-preview.version>
+    <nuxeo.website-preview.version>9.10-SNAPSHOT</nuxeo.website-preview.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -63,32 +63,22 @@
         <enabled>true</enabled>
       </releases>
       <snapshots>
+        <updatePolicy>always</updatePolicy>
         <enabled>true</enabled>
       </snapshots>
     </repository>
   </repositories>
+
   <pluginRepositories>
     <pluginRepository>
       <id>public</id>
       <url>http://maven.nuxeo.org/nexus/content/groups/public</url>
-      <name>Nuxeo virtual release repository</name>
+      <name>Nuxeo releases</name>
       <releases>
         <enabled>true</enabled>
       </releases>
       <snapshots>
         <enabled>false</enabled>
-      </snapshots>
-    </pluginRepository>
-    <pluginRepository>
-      <id>public-snapshot</id>
-      <url>http://maven.nuxeo.org/nexus/content/groups/public-snapshot</url>
-      <name>Nuxeo virtual snapshot repository</name>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <updatePolicy>always</updatePolicy>
-        <enabled>true</enabled>
       </snapshots>
     </pluginRepository>
   </pluginRepositories>

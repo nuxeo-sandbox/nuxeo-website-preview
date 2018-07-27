@@ -25,14 +25,14 @@ import org.jboss.seam.annotations.Create;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
-import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
+import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.platform.ui.web.api.NavigationContext;
 
 /**
  * Assume there is one single html. If more than one, looks for index.html, or return any of them
- * 
+ *
  * @since 7.3
  */
 @Name("websitePreview")
@@ -54,7 +54,7 @@ public class WebsitePreviewHelperBean implements Serializable {
     protected NavigationContext navigationContext;
 
     @Create
-    public void initialize() throws ClientException {
+    public void initialize() throws NuxeoException {
 
         try {
             setup();
@@ -80,7 +80,7 @@ public class WebsitePreviewHelperBean implements Serializable {
 
     public boolean hasMiniSite() {
 
-        return this.hasMiniSite;
+        return hasMiniSite;
     }
 
     public String getMainUrl() {

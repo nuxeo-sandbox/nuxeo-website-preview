@@ -16,13 +16,25 @@
   <platforms>
     <platform>server-@DISTRIB_VERSION@</platform>
     <platform>server-@DISTRIB_VERSION@-HF</platform>
-    <platform>cap-7.10</platform>
-    <platform>cap-7.10-HF*</platform>
-    <platform>cap-8.3</platform>
   </platforms>
+  <!-- Dependencies on other packages -->
   <dependencies>
+  <!-- <package>another-package:1.0.0:1.0.0</package> -->
+  <!-- If you require JSF UI package:  -->
     <package>nuxeo-jsf-ui</package>
+  <!-- If you require WEB UI package:  -->
+  <!--  <package>nuxeo-web-ui</package> -->
   </dependencies>
-  <license>LGPL</license>
-  <license-url>http://www.gnu.org/licenses/lgpl.html</license-url>
+  <!-- Conflicts with other packages -->
+  <!-- <conflicts> -->
+  <!-- <package>a-conflicting-package:1.0.0:1.0.0</package> -->
+  <!-- </conflicts> -->
+  <!-- Provides features of other packages -->
+  <!-- <provides> -->
+  <!-- <package>an-embedded-package:1.0.0:1.0.0</package> -->
+  <!-- </provides> -->
+  <license>Apache License, Version 2.0</license>
+  <license-url>http://www.apache.org/licenses/LICENSE-2.0</license-url>
+  <!-- Visibility: PRIVATE | MARKETPLACE | DEV | PUBLIC -->
+  <visibility>DEV</visibility>
 </package>
