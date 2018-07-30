@@ -24,17 +24,18 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.DocumentModel;
+import org.nuxeo.ecm.core.api.DocumentNotFoundException;
 import org.nuxeo.ecm.core.api.IdRef;
 import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.webengine.model.WebObject;
 import org.nuxeo.ecm.webengine.model.impl.DefaultObject;
 
 /**
- *
  * @since 7.3
  */
 @WebObject(type = "Website")
@@ -73,7 +74,7 @@ public class WebsiteObject extends DefaultObject {
                     r = Response.status(Status.NOT_FOUND).build();
                 } else {
                     try {
-                        if(doc.hasSchema("file")) {
+                        if (doc.hasSchema("file")) {
                             Blob b = (Blob) doc.getPropertyValue("file:content");
                             ResponseBuilder resp = Response.ok(b.getFile());
                             r = resp.build();
@@ -119,13 +120,38 @@ public class WebsiteObject extends DefaultObject {
                 doc = ctx.getCoreSession().getDocument(new PathRef(path));
 
                 Blob b = (Blob) doc.getPropertyValue("file:content");
-                ResponseBuilder resp = Response.ok(b.getFile());
+                if (b == null) {
+                    log.warn("Document " + path + " has no blob");
+                } else {
+                    /*
+                CHANGER CSS => test hard codage "if css => text/css"
+                       Contribuer le Mimetype registry
+                     */
+                    ResponseBuilder resp = Response.ok(b.getFile());
 
-                resp.type(b.getMimeType());
-                r = resp.build();
+                    String fileName = b.getFilename();
+                    String mimeType = b.getMimeType();
 
+
+                    log.warn("Coucou: " + fileName + " - " + mimeType);
+
+                    // Assume there is a file name. If null, we'll fail miserably with a NPE
+                    // Pb in some browsers. Returning text/plain as mimetype instead of text/css makes
+                    // the browser to ignore the file, or even log a 404
+                    String ext = FilenameUtils.getExtension(fileName);
+                    if(ext != null && "css".equals(ext.toLowerCase())) {
+                        log.warn("Adjusting mimeType");
+                        mimeType = "text/css";
+                    }
+
+                    resp.type(mimeType);
+                    r = resp.build();
+                }
+
+            } catch (DocumentNotFoundException e) {
+                log.error("Document " + path + " not found", e);
             } catch (Exception e) {
-                // This is where we try to rebuild a nuxeo path?
+                log.error(e);
             }
 
         }

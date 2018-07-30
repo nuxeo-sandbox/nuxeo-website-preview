@@ -1,5 +1,5 @@
 <package type="addon" name="nuxeo-website-preview" version="@VERSION@">
-  <title>Nuxeo TO_BE_DONE</title>
+  <title>Nuxeo Website Preview</title>
   <description>
     <p>This addon activates the Nuxeo Website Preview addon.</p>
     <p>This addon adds new features as explained <a href="https://github.com/nuxeo-sandbox/nuxeo-website-preview">here</a></p>
