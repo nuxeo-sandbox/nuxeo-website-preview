@@ -56,7 +56,7 @@ public class WebsitePreviewUtils {
      * <li><code>id</code> was found but it not <i>Folderish</i></li>
      * <li>Current user has not enough right to read (either read the parent or the child)</li>
      * </ul>
-     * 
+     *
      * @param session
      * @param parent, the root parent
      * @return
@@ -70,7 +70,10 @@ public class WebsitePreviewUtils {
             mainHtml = parentIdAndMainHtml.get(parent.getId());
 
             if (mainHtml != null) {
-                mainHtml.refresh();
+                // We need to reload the document. Cannot use mainHtml.refresh(), because
+                // the CoreSession may have change (has most likely changed) since "last" call
+                // and we will get an error.
+                mainHtml = session.getDocument(mainHtml.getRef());
             } else {
                 // Must protect writing in shared array, to save cpu when getting the same html from different threads
                 synchronized (parentIdAndMainHtml) {
@@ -79,11 +82,9 @@ public class WebsitePreviewUtils {
                     mainHtml = parentIdAndMainHtml.get(parent.getId());
                     if (mainHtml == null) {
                         // Must find a .html file in first children
-                        String nxql = "SELECT * FROM Document WHERE ecm:parentId = '"
-                                + parent.getId()
-                                + "'"
-                                + " AND (content/mime-type ILIKE '%html' OR content/name ILIKE '%html%' OR content/name ILIKE '%hml')"
-                                + " AND ecm:mixinType != 'HiddenInNavigation' AND ecm:isProxy = 0 AND ecm:isCheckedInVersion = 0 AND ecm:currentLifeCycleState != 'deleted'";
+                        String nxql = "SELECT * FROM Document WHERE ecm:parentId = '" + parent.getId() + "'"
+                                + " AND (content/mime-type ILIKE '%html' OR content/name ILIKE '%html%' OR content/name ILIKE '%htm')"
+                                + " AND ecm:mixinType != 'HiddenInNavigation' AND ecm:isProxy = 0 AND ecm:isVersion = 0 AND ecm:currentLifeCycleState != 'deleted'";
                         DocumentModelList children = session.query(nxql);
 
                         if (children.size() == 1) {
@@ -107,6 +108,11 @@ public class WebsitePreviewUtils {
                                 }
                             }
                         }
+                    } else {
+                        // We need to reload the document. Cannot use mainHtml.refresh(), because
+                        // the CoreSession may have changed (has most likely changed) since "last" call
+                        // and we will get an error.
+                        mainHtml = session.getDocument(mainHtml.getRef());
                     }
                     if (mainHtml != null) {
                         parentIdAndMainHtml.put(parent.getId(), mainHtml);
@@ -118,6 +124,22 @@ public class WebsitePreviewUtils {
         return mainHtml;
     }
 
+    /**
+     * Checks if the document is Folderish and contains at least one HTML file at first level
+     *
+     * @param session
+     * @param doc
+     * @return
+     * @since 9.10
+     */
+    public static boolean hasMiniSite(CoreSession session, DocumentModel doc) {
+        return WebsitePreviewUtils.getMainHtmlDocument(session, doc) != null;
+    }
+
+    public static boolean hasMiniSite(Blob blob) {
+        return WebsitePreviewUtils.getMainHtmlDocument(session, doc) != null;
+    }
+
     public static int getMaxElementsInCache() {
         return MAX_ELEMENTS_IN_CACHE;
     }
@@ -125,6 +147,5 @@ public class WebsitePreviewUtils {
     public static void setMaxElementsInCache(int value) {
         MAX_ELEMENTS_IN_CACHE = value <= 10 ? 50 : value;
     }
-    
-    
+
 }

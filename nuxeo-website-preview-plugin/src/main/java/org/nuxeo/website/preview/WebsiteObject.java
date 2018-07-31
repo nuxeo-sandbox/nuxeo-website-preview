@@ -132,15 +132,12 @@ public class WebsiteObject extends DefaultObject {
                     String fileName = b.getFilename();
                     String mimeType = b.getMimeType();
 
-
-                    log.warn("Coucou: " + fileName + " - " + mimeType);
-
                     // Assume there is a file name. If null, we'll fail miserably with a NPE
                     // Pb in some browsers. Returning text/plain as mimetype instead of text/css makes
                     // the browser to ignore the file, or even log a 404
                     String ext = FilenameUtils.getExtension(fileName);
-                    if(ext != null && "css".equals(ext.toLowerCase())) {
-                        log.warn("Adjusting mimeType");
+                    if(ext != null && "css".equalsIgnoreCase(ext) && !"text/css".equalsIgnoreCase(mimeType)) {
+                        log.warn("Adjusting mimeType for css");
                         mimeType = "text/css";
                     }
 
