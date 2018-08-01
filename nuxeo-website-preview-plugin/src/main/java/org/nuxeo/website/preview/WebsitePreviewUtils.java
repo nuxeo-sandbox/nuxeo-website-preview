@@ -136,9 +136,11 @@ public class WebsitePreviewUtils {
         return WebsitePreviewUtils.getMainHtmlDocument(session, doc) != null;
     }
 
+    /*
     public static boolean hasMiniSite(Blob blob) {
         return WebsitePreviewUtils.getMainHtmlDocument(session, doc) != null;
     }
+    */
 
     public static int getMaxElementsInCache() {
         return MAX_ELEMENTS_IN_CACHE;
