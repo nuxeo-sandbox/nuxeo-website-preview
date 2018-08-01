@@ -39,6 +39,10 @@ This means that a folder contain html document(s) will be seen as a mini website
 
 For example, say you have a _Folderish_ document, named "My Site", whose `id` is `1234-5678-9ABC-DEF0`, and you are testing on your localhost, you can display the preview using this URL: `http://localhost:8080/nuxeo/site/WSP/1234-5678-9ABC-DEF0/index.html`
 
+* The plugin contributes the `WebsitePreviewAvailable` facet:
+  * so you can dynamically add/remove this facet from your documents for quick test to display a "preview" button in the UI for example
+  * But notice the plugin does not add/remove it at anytime,; it just tests it in the hasMinisite operation.
+
 (*) Assuming current user is logged in and has enough rights to at least _read_ the blobs, or is anonymous and you allowed anonymous users and setup the permissions, etc. etc.
 
 ### Utilities - Operation(s)
@@ -95,7 +99,7 @@ The plugin provides the following operation(s):
 </dom-module>
 ```
 
-* Create a Document Page _pill_ (In Studio Designer > UI)  displaying this element, with the correct filter (for Folderish, or for a cusotm document type, ...)
+* Create a Document Page _pill_ (In Studio Designer > UI)  displaying this element, with the correct filter (typically, if the document has the `WebsitePreviewAvailable` facet)
 
 ## Usage in JSF UI
 
