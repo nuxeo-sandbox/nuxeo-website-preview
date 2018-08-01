@@ -35,6 +35,8 @@ public class WebsitePreviewUtils {
 
     protected static int MAX_ELEMENTS_IN_CACHE = 500;
 
+    public static final String FACET = "WebsitePreviewAvailable";
+
     // Caching, to avoid doing too many NXQL.
     protected static LinkedHashMap<String, DocumentModel> parentIdAndMainHtml = new LinkedHashMap<String, DocumentModel>();
 
@@ -125,7 +127,7 @@ public class WebsitePreviewUtils {
     }
 
     /**
-     * Checks if the document is Folderish and contains at least one HTML file at first level
+     * Checks if the can be previewed as a miniwebsite
      *
      * @param session
      * @param doc
@@ -133,7 +135,7 @@ public class WebsitePreviewUtils {
      * @since 9.10
      */
     public static boolean hasMiniSite(CoreSession session, DocumentModel doc) {
-        return WebsitePreviewUtils.getMainHtmlDocument(session, doc) != null;
+        return doc.hasFacet(FACET) || WebsitePreviewUtils.getMainHtmlDocument(session, doc) != null;
     }
 
     /*

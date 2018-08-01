@@ -17,8 +17,8 @@ If the folder contains several Document whose blobs are html files and none of t
 This means that a folder contain html document(s) will be seen as a mini website. The preview will display the HTML, but the result is unpredictable.
 
 #### WARNING AND TODO
-* Separate JSF from WebUI. As of today, the plugin requires both UIs installed
-* Add unit tests
+* **Separate JSF** from WebUI. As of today, the plugin requires both UIs installed
+* Add **unit tests**
 * Make it a service:
   * For example: Contribute the NXQL used to detect the html file
   * Add listeners to automatically check if it can be website and add the `WebsitePreviewAvailable` facet
@@ -48,7 +48,11 @@ The plugin provides the following operation(s):
 * `input` is a document
 *  `output` is the document, unchanged
 *  The operation looks for an html file inside the document and it it finds it, it sets the `WSP_hasMinisite` Context Variable to `true`
-*  If the input document is not a `Folderish` or it does not contain any HTML document at its first level, `WSP_hasMinisite` Context Variable to `false`
+*  If the input document...
+  * Does not have the "" facet
+  * _or_is not a `Folderish` that contains at elast an HTML document at its first level
+  
+  ...`WSP_hasMinisite` Context Variable is set to `false`
 
 ### Usage in WebUI
 * First, create an element (in Studio Designer > Resources) with an iframe and set the src of the iframe to the correct url. For example:

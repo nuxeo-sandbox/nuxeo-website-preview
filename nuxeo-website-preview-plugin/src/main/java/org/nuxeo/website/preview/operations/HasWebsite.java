@@ -47,9 +47,9 @@ public class HasWebsite {
     @OperationMethod
     public DocumentModel run(DocumentModel input) {
 
-        DocumentModel mainHtmlDoc = WebsitePreviewUtils.getMainHtmlDocument(session, input);
+        boolean hasMiniSite = WebsitePreviewUtils.hasMiniSite(session, input);
 
-        ctx.put(CONTEXT_VAR_NAME, mainHtmlDoc != null);
+        ctx.put(CONTEXT_VAR_NAME, hasMiniSite);
 
         return input;
     }
