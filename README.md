@@ -18,6 +18,9 @@ This means that a folder contain html document(s) will be seen as a mini website
 
 #### WARNING AND TODO
 * **Separate JSF** from WebUI. As of today, the plugin requires both UIs installed
+  * DONE => JSF removed, not needed
+* Handle zip file, not only Folderish
+  * DONE. If /nuxeo/WSP/the_doc_id/index.html is a document with a `file` schema, the plugin uses it and looks inside the zip, if any.
 * Add **unit tests**
 * Make it a service:
   * For example: Contribute the NXQL used to detect the html file
