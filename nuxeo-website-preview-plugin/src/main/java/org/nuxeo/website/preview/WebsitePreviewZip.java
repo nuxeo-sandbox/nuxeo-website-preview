@@ -114,6 +114,7 @@ public class WebsitePreviewZip implements WebsitePreview {
                         fos.write(buffer, 0, len);
                     }
                     fos.close();
+                    mainHtmlBlob.setFilename(entry.getName());
                 }
 
 
