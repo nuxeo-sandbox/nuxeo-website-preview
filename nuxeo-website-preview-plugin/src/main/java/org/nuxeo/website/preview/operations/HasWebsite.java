@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  * Contributors:
- *     thibaud
+ *     Thibaud Arguillere
  */
 package org.nuxeo.website.preview.operations;
 
