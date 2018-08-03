@@ -1,67 +1,71 @@
-## nuxeo-website-preview
+# nuxeo-website-preview
 
 
-The plug-in provides a widget which displays the preview of a mini-site, where an .html file is displayed, referencing images and resources with _relative_ paths.
+This plug-in allows to display a website stored in Nuxeo either as:
 
-It assumes the current document:
+* A `Folderish` Document containing the site, with relative paths. So for example, an index.html file with an `img` tag whose `src` attribute is `"img/logo.png"`,  and at first level of the Document, there is an `img` folder containing the logo.png Picture document
 
-* Is a `Folderish`
-* And it contains _at its first level_:
-  * One single .html file
-  * Or, if several, one whose name is `index.html`
+* Or a non `Folderish` document whose `file:content` field contains a blob that can be unzipped as a website (typically a .zip file). Please read below, "WARNING About the Zip Format"
 
-If the folder contains several Document whose blobs are html files and none of them has a file named "index.html", it returns one of them (arbitrary), so it is likely the site will not work correctly in this case.
+* _Notice_: It will also display the minisite, if any, when the document is a `Folderish` whose content does not have any html file to display at first level and if this `Folderish` also have zip file in it's `file` schema.
+  
+* Also, this is about _previewing_ The preview is displayed in the context of the Nuxeo application. This means, some JavaScript or access to other website, if any, may fail (typically because of CORS)
 
-**WARNING**
+## How to Use
 
-This means that a folder contain html document(s) will be seen as a mini website. The preview will display the HTML, but the result is unpredictable.
+The plug-in creates a _WebEngine_ module allowing to access the embedded website _via_ a URL. The name of the module (in the URLs) is `WSP` (WebSitePreview).
 
-#### WARNING AND TODO
-* **Separate JSF** from WebUI. As of today, the plugin requires both UIs installed
-  * DONE => JSF removed, not needed
-* Handle zip file, not only Folderish
-  * DONE. If /nuxeo/WSP/the_doc_id/index.html is a document with a `file` schema, the plugin uses it and looks inside the zip, if any.
-* Add **unit tests**
-* Make it a service:
-  * For example: Contribute the NXQL used to detect the html file
-  * Add listeners to automatically check if it can be website and add the `WebsitePreviewAvailable` facet
-  * . . .
- 
-
-
-### Good to Know
-* it is a _preview_ of the html and its related resources: Related links will all request a resource from the nuxeo server. It is ok for any resource stored in the correct folder/subfolder, but links will not work with custom and dynamic URLS.
-
-* The plug-in uses a _WebEngine_ module whose name (in the URLs) is `WSP` (**W**eb**S**ite**P**review).
-
-* Also, to be a bit more user friendly, the main url _must_ end with `index.html`, _whatever the real name of your main html file_.
+* In order tp be as easier possible to use, the main url _must_ end with `index.html`, _whatever the real name of your main html file_.
 
 * So, to access the preview(*), the URL to use is:
-
     `{server:port}/nuxeo/site/WSP/main-parent-doc-id/index.html`
+   
+    This URL will typically be used in the UI using an `iframe`
 
-For example, say you have a _Folderish_ document, named "My Site", whose `id` is `1234-5678-9ABC-DEF0`, and you are testing on your localhost, you can display the preview using this URL: `http://localhost:8080/nuxeo/site/WSP/1234-5678-9ABC-DEF0/index.html`
+* For example, say you have a _Folderish_ document, named "My Site", whose `id` is `1234-5678-9ABC-DEF0`, and you are testing on your localhost, you can display the preview using this URL: `http://localhost:8080/nuxeo/site/WSP/1234-5678-9ABC-DEF0/index.html`.
+
+  The exact same URL is used if instead of a `Folderish` containing all the website as Nuxeo documents, it is a `FIle` whose `file:content` holds a zip containing the website
 
 * The plugin contributes the `WebsitePreviewAvailable` facet:
-  * so you can dynamically add/remove this facet from your documents for quick test to display a "preview" button in the UI for example
-  * But notice the plugin does not add/remove it at anytime,; it just tests it in the hasMinisite operation.
+  * Because not every `Folderish` and not every .zip host a website 
+  * So you can dynamically add/remove (using the native `Document.AddFacet` and `Document.RemoveFacet` operaitons) this facet from your documents for quick test to display a "preview" button in the UI for example
+  * **IMPORTANT**: The plugin does not add/remove this facet at anytime, it is for you to use.
+    * A typical example would be a button in the UI, like "This is a website". The user clicks it and you run the `Document.Addfacet` operation to add the `WebsitePreviewAvailable` facet.
+    * This could also be done automatically in a listener depending on some metadata and rules, and if the `Document.HasMinisite` operation returns `true` (see below).
 
 (*) Assuming current user is logged in and has enough rights to at least _read_ the blobs, or is anonymous and you allowed anonymous users and setup the permissions, etc. etc.
 
-### Utilities - Operation(s)
+## The "Main" HTML File
+
+Whatever the source (a `Folderish` or a .zip), the plugin searches for a min html file using this algorithm:
+
+* Whatever the name, it must be at first level, the plugin dies not search in nested folders
+* If, at first level, one file is `index.html`, the document is considered being a mini website and this file will be returned at the first peview
+* If there is no `index.html` file, the plugin searches for any other .html and returns the first it finds, to be used at first display
+* If there is no .html file at all at first level, the plug-in returns a 404 error.
+
+**WARNING**
+
+This means that if the source document contains at least one html document at first level, will be seen as a mini website. The preview will display the HTML, but the result is unpredictable if it is not website with relative paths for sub-elements.
+
+This is why you should use the `WebsitePreviewAvailable ` facet and add your preview only when it is relevant
+
+
+
+## Utilities - Operation(s)
 The plugin provides the following operation(s):
 
 ####    `Document.HasMinisite`
 * `input` is a document
 *  `output` is the document, unchanged
-*  The operation looks for an html file inside the document and it it finds it, it sets the `WSP_hasMinisite` Context Variable to `true`
-*  If the input document...
-  * Does not have the "" facet
-  * _or_is not a `Folderish` that contains at elast an HTML document at its first level
+*  The operation sets the `WSP_hasMinisite` boolean Context Variable with the result:
+  *  If the Document has the `WebsitePreviewAvailable ` facet, `WSP_hasMinisite` is `true`
+  *  Else, if it is a `Folderish` document with an html child at first level, `WSP_hasMinisite` is `true`
+  *  Else, it the document has the `file` schema and `file:content` can be unzipped and contains an html file at first level, `WSP_hasMinisite` is set to ` true`
+  *  Else, `WSP_hasMinisite` is set to `false.
   
-  ...`WSP_hasMinisite` Context Variable is set to `false`
 
-### Usage in WebUI
+## Usage in WebUI
 * First, create an element (in Studio Designer > Resources) with an iframe and set the src of the iframe to the correct url. For example:
 
 
@@ -106,35 +110,53 @@ The plugin provides the following operation(s):
 
 ## Usage in JSF UI
 
-After installing the plug-ins in the server (see below) you must use the specific preview widget deployed by the plug-in. Typically, we recommend doing the following in Nuxeo Studio:
+Create an `xhtml` widget with an iframe, setting up the correct URL for the `src` attribut.
 
-* Create a new Tab, title "Preview" for example
-* In the "Activation" sub tab:
-  * Make it available only for document with the "Folderish" facet
-  * We also recommend you add the following expression in the "Custom EL expression" part: `#{websitePreview.hasMiniSite()}`. This will make sure the "Preview" tab is not displayed when a folder does not contain any html file.
-* Drop a "Template" widget
-  * In "Custom Properties Configuration", add a new property
-  * Name:  `template`
-  * Value: `/widgets/website-preview-widget.xhtml`
 
-Nothing more to do.
+## WARNING About the Zip Format
+When using a zip file, it must not be built with a tool that prefixes the paths of every item. For example, if you zip the `mysite` folder containing...
 
-### License
-(C) Copyright 2018 Nuxeo SA (http://nuxeo.com/) and others.
+```
+img
+  logo.png
+index.html
+otherpage.html
+```
 
-All rights reserved. This program and the accompanying materials
-are made available under the terms of the GNU Lesser General Public License
-(LGPL) version 2.1 which accompanies this distribution, and is available at
-http://www.gnu.org/licenses/lgpl-2.1.html
+... the zip file **must** not have a TOC prefixing every path with `mysite`. The list of files in the zip must be...
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-Lesser General Public License for more details.
+```
+img/
+img/logo.png
+index.html
+otherpage.html
+```
+
+...and not:
+
+```
+mysite/img/
+mysite/img/logo.png
+mysite/index.html
+mysite/otherpage.html
+```
+
+## Support
+
+**These features are not part of the Nuxeo Production platform.**
+
+These solutions are provided for inspiration and we encourage customers to use them as code samples and learning resources.
+
+This is a moving project (no API maintenance, no deprecation process, etc.) If any of these solutions are found to be useful for the Nuxeo Platform in general, they will be integrated directly into platform, not maintained in this repository.
+
+
+## License
+
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 Contributors:
 Thibaud Arguillere (https://github.com/ThibArg)
 
-### About Nuxeo
+## About Nuxeo
 
 Nuxeo provides a modular, extensible Java-based [open source software platform for enterprise content management](http://www.nuxeo.com) and packaged applications for Document Management, Digital Asset Management and Case Management. Designed by developers for developers, the Nuxeo platform offers a modern architecture, a powerful plug-in model and extensive packaging capabilities for building content applications.
