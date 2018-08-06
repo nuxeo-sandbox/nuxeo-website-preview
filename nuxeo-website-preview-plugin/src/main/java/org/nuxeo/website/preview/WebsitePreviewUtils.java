@@ -38,6 +38,10 @@ public class WebsitePreviewUtils {
     // Caching, to avoid doing too many NXQL.
     protected static LinkedHashMap<String, DocumentModel> parentIdAndMainHtml = new LinkedHashMap<String, DocumentModel>();
 
+    public enum TYPE {
+        ZIP, FOLDER, NOT_AND_EMBEDDED_WEBSITE
+    };
+
     /**
      * Looks for the "main" html file in the input document. If it is a folder, looks at first level, if it is a not,
      * looks inside the blob, expected to be a zip (or unzippable) blob, and looks at first level.
@@ -106,6 +110,38 @@ public class WebsitePreviewUtils {
      */
     public static boolean hasMiniSite(CoreSession session, DocumentModel doc) {
         return doc.hasFacet(WebsitePreview.FACET) || WebsitePreviewUtils.getMainHtmlBlob(session, doc) != null;
+    }
+
+    /**
+     * the type of the container, folder or zip. WARNING: This is done by checking misc. properties AND getting the
+     * "main html file". Not always optimized.
+     *
+     * @param session
+     * @param doc
+     * @return the type of the container, folder or zip
+     * @since 9.10
+     */
+    public static TYPE getType(CoreSession session, DocumentModel doc) {
+
+        Blob mainBlob = null;
+
+        if (doc.isFolder()) {
+            WebsitePreviewFolder wspFolder = new WebsitePreviewFolder(session, doc);
+            mainBlob = wspFolder.getMainHtmlBlob();
+            if (mainBlob != null) {
+                return TYPE.FOLDER;
+            }
+        }
+
+        if (mainBlob == null && doc.hasSchema("file")) {
+            WebsitePreviewZip wspZip = new WebsitePreviewZip(session, doc);
+            mainBlob = wspZip.getMainHtmlBlob();
+            if (mainBlob != null) {
+                return TYPE.ZIP;
+            }
+        }
+
+        return TYPE.NOT_AND_EMBEDDED_WEBSITE;
     }
 
 }
