@@ -15,7 +15,7 @@ This plug-in allows to display a website stored in Nuxeo either as:
 
 The plug-in creates a _WebEngine_ module allowing to access the embedded website _via_ a URL. The name of the module (in the URLs) is `WSP` (WebSitePreview).
 
-* In order tp be as easier possible to use, the main url _must_ end with `index.html`, _whatever the real name of your main html file_.
+* In order tp be as easy possible to use, the main url _must_ end with `index.html`, _whatever the real name of your main html file_.
 
 * So, to access the preview(*), the URL to use is:
     `{server:port}/nuxeo/site/WSP/main-parent-doc-id/index.html`
@@ -24,7 +24,7 @@ The plug-in creates a _WebEngine_ module allowing to access the embedded website
 
 * For example, say you have a _Folderish_ document, named "My Site", whose `id` is `1234-5678-9ABC-DEF0`, and you are testing on your localhost, you can display the preview using this URL: `http://localhost:8080/nuxeo/site/WSP/1234-5678-9ABC-DEF0/index.html`.
 
-  The exact same URL is used if instead of a `Folderish` containing all the website as Nuxeo documents, it is a `FIle` whose `file:content` holds a zip containing the website
+  The exact same URL is used if instead of a `Folderish` containing all the website as Nuxeo documents, it is a `File` whose `file:content` holds a zip containing the website
 
 * The plugin contributes the `WebsitePreviewAvailable` facet:
   * Because not every `Folderish` and not every .zip host a website 
@@ -33,13 +33,13 @@ The plug-in creates a _WebEngine_ module allowing to access the embedded website
     * A typical example would be a button in the UI, like "This is a website". The user clicks it and you run the `Document.Addfacet` operation to add the `WebsitePreviewAvailable` facet.
     * This could also be done automatically in a listener depending on some metadata and rules, and if the `Document.HasMinisite` operation returns `true` (see below).
 
-(*) Assuming current user is logged in and has enough rights to at least _read_ the blobs, or is anonymous and you allowed anonymous users and setup the permissions, etc. etc.
+(*) Assuming current user is logged in and has enough rights to at least _read_ the blobs.
 
 ## The "Main" HTML File
 
 Whatever the source (a `Folderish` or a .zip), the plugin searches for a min html file using this algorithm:
 
-* Whatever the name, it must be at first level, the plugin dies not search in nested folders
+* Whatever the name, it must be at first level, the plugin does not search in nested folders
 * If, at first level, one file is `index.html`, the document is considered being a mini website and this file will be returned at the first peview
 * If there is no `index.html` file, the plugin searches for any other .html and returns the first it finds, to be used at first display
 * If there is no .html file at all at first level, the plug-in returns a 404 error.
