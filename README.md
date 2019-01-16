@@ -11,6 +11,8 @@ This plug-in allows to display a website stored in Nuxeo either as:
   
 * Also, this is about _previewing_ The preview is displayed in the context of the Nuxeo application. This means, some JavaScript or access to other website, if any, may fail (typically because of CORS)
 
+**WARNING**: Please, see the _Security Warning_ below
+
 ## How to Use
 
 The plug-in creates a _WebEngine_ module allowing to access the embedded website _via_ a URL. The name of the module (in the URLs) is `WSP` (WebSitePreview).
@@ -140,6 +142,14 @@ mysite/img/logo.png
 mysite/index.html
 mysite/otherpage.html
 ```
+
+## Security Warning
+The plugin sends the files as they are stored (either as single Nuxeo Document or inside the .zip file). This means no sanitizing is done, the JavaScript is not filtered and is sent as is.
+
+If there is any risk of a user uploading a website that contains some malicious JavaScript (like getting the cookies to steel the session), then we recommend to add configuration to approve/reject the document before making it available.
+
+The plugin could also be forked and sanitizing the JavaScript can be done (Nuxeo has APIs for this purpose). This means the plugin would then send html files that contain no `<script>` tag at all for example.
+
 
 ## Support
 
