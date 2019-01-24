@@ -55,7 +55,7 @@ public class WebsitePreviewWE extends ModuleRoot {
      * Returns the full URL to use to display the website. <code>mainParentId</code> is, well, the ID of the main
      * folder, the one containing the main html file.
      * 
-     * @param docId
+     * @param mainParentId
      * @return
      * @since 7.3
      */

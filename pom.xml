@@ -5,32 +5,29 @@
   <parent>
     <groupId>org.nuxeo.ecm.distribution</groupId>
     <artifactId>nuxeo-distribution</artifactId>
-    <version>9.10</version>
+    <version>10.10</version>
   </parent>
   <groupId>nuxeo-website-preview</groupId>
   <artifactId>nuxeo-website-preview-parent</artifactId>
   <name>Parent Project for Nuxeo Website Preview</name>
-  <version>9.10-SNAPSHOT</version>
+  <version>10.10-SNAPSHOT</version>
   <packaging>pom</packaging>
   <description />
   <modules>
     <module>nuxeo-website-preview-plugin</module>
     <module>nuxeo-website-preview-mp</module>
   </modules>
-  <properties>
-    <nuxeo.website-preview.version>9.10-SNAPSHOT</nuxeo.website-preview.version>
-  </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>nuxeo-website-preview</groupId>
         <artifactId>nuxeo-website-preview-plugin</artifactId>
-        <version>${nuxeo.website-preview.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nuxeo-website-preview</groupId>
         <artifactId>nuxeo-website-preview-mp</artifactId>
-        <version>${nuxeo.website-preview.version}</version>
+        <version>${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
