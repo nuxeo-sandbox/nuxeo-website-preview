@@ -25,10 +25,12 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nuxeo.ecm.automation.test.EmbeddedAutomationServerFeature;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.event.EventService;
@@ -36,36 +38,36 @@ import org.nuxeo.ecm.core.test.DefaultRepositoryInit;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.restapi.test.BaseTest;
-import org.nuxeo.ecm.restapi.test.RestServerFeature;
+//import org.nuxeo.ecm.webengine.test.WebEngineFeature;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
-import org.nuxeo.runtime.test.runner.ServletContainerFeature;
+import org.nuxeo.runtime.test.runner.Jetty;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
 import javax.inject.Inject;
-import java.io.IOException;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+
+import com.sun.jersey.api.client.WebResource;
+
 @RunWith(FeaturesRunner.class)
-@Features({RestServerFeature.class})
+@Features({/*AutomationFeature.class,*/ /*WebEngineFeature.class*/ EmbeddedAutomationServerFeature.class} )
 @RepositoryConfig(init = DefaultRepositoryInit.class, cleanup = Granularity.METHOD)
-@Deploy({
-    "nuxeo-website-preview"
-})
+@Jetty(port = 18090)
+@Deploy({ "org.nuxeo.ecm.webengine.core",
+    "nuxeo-website-preview" })
 public class TestWebsitePreviewWebEngine extends BaseTest {
 
-    public static final String BASE_URL = "http://localhost";
+    public static final String BASE_URL = "http://localhost:18090";
 
     public static final String LOGO_FILE_NAME = "NUXEO-LOGO-1.png";
 
     public static final String PATH_TO_LOGO = "img/" + LOGO_FILE_NAME;
 
     protected DocumentModel testDocsFolder;
-
-    @Inject
-    protected ServletContainerFeature servletContainerFeature;
 
     @Inject
     protected CoreSession coreSession;
@@ -75,11 +77,14 @@ public class TestWebsitePreviewWebEngine extends BaseTest {
 
     @Before
     public void setup() {
+
         testDocsFolder = coreSession.createDocumentModel("/", "testWSP", "Folder");
         testDocsFolder.setPropertyValue("dc:title", "testWSP");
         testDocsFolder = coreSession.createDocument(testDocsFolder);
         testDocsFolder = coreSession.saveDocument(testDocsFolder);
+
         coreSession.save();
+
     }
 
     @After
@@ -103,9 +108,12 @@ public class TestWebsitePreviewWebEngine extends BaseTest {
 
         eventService.waitForAsyncCompletion();
 
+        // Start the server
+        WebResource resource = getServiceFor(BASE_URL, "Administrator", "Administrator");
+
         // Get the main HTML page
-        int port = servletContainerFeature.getPort();
-        String url = BASE_URL + ":"+port+"/WSP/" + doc.getId() + "/index.html";
+        // REMINDER: In WebEngine unit test and Jetty server, do not add /nuxeo/site.
+        String url = BASE_URL + "/WSP/" + doc.getId() + "/index.html";
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(url);
             //request.setHeader(HttpHeaders.CONTENT_TYPE, "text/html" /*"application/json"*/);
@@ -124,7 +132,7 @@ public class TestWebsitePreviewWebEngine extends BaseTest {
         }
 
         // Get the logo
-        url = BASE_URL + ":"+port+ "/WSP/" + doc.getId() + "/" + PATH_TO_LOGO;
+        url = BASE_URL + "/WSP/" + doc.getId() + "/" + PATH_TO_LOGO;
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(url);
             //request.setHeader(HttpHeaders.CONTENT_TYPE, "text/html" /*"application/json"*/);

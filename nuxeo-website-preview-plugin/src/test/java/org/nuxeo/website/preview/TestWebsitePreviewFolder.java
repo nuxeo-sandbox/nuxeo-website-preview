@@ -43,9 +43,11 @@ import static org.junit.Assert.*;
 @RunWith(FeaturesRunner.class)
 @Features(AutomationFeature.class)
 @RepositoryConfig(init = DefaultRepositoryInit.class, cleanup = Granularity.METHOD)
-@Deploy({
-    "nuxeo-website-preview"
-})
+@Deploy({ "org.nuxeo.ecm.platform.picture.api", "org.nuxeo.ecm.platform.picture.core",
+        "org.nuxeo.ecm.platform.picture.convert", "org.nuxeo.ecm.platform.tag",
+        "org.nuxeo.ecm.platform.commandline.executor", "org.nuxeo.ecm.platform.rendition.core",
+        "nuxeo-website-preview" })
+@LocalDeploy({ "nuxeo-website-preview:OSGI-INF/disable-listeners-contrib.xml" })
 public class TestWebsitePreviewFolder {
 
     public static final String LOGO_FILE_NAME = "NUXEO-LOGO-1.png";
@@ -88,7 +90,7 @@ public class TestWebsitePreviewFolder {
         doc = TestUtils.createDocumentFromFile(coreSession, mainFolder, "File", "wsp-folder/test1.html");
         // Now the img folder and its logo
         DocumentModel imgFolder = TestUtils.createFolder(coreSession, mainFolder, "img");
-        doc = TestUtils.createDocumentFromFile(coreSession, imgFolder, "File", "wsp-folder/img/NUXEO-LOGO-1.png");
+        doc = TestUtils.createDocumentFromFile(coreSession, imgFolder, "Picture", "wsp-folder/img/NUXEO-LOGO-1.png");
 
         // Save for good
         coreSession.save();

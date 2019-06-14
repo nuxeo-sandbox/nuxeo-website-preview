@@ -50,4 +50,24 @@ public class WebsitePreviewWE extends ModuleRoot {
 
         return ctx.newObject("Website", docId);
     }
+
+    /**
+     * Returns the full URL to use to display the website. <code>mainParentId</code> is, well, the ID of the main
+     * folder, the one containing the main html file.
+     * 
+     * @param docId
+     * @return
+     * @since 7.3
+     */
+    public static String buildMainUrl(String mainParentId) {
+        
+        if(BASE_URL == null) {
+            BASE_URL = org.nuxeo.ecm.platform.ui.web.util.BaseURL.getBaseURL();;
+        }
+        
+        return BASE_URL // CONTAINS THE FINAL "/"
+                + "site" + PREFIX_PATH + "/" + mainParentId + MAIN_URL_SUFFIX;
+
+    }
+
 }
