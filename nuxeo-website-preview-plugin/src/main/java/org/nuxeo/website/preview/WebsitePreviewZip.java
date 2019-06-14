@@ -29,6 +29,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.common.Environment;
@@ -158,6 +159,7 @@ public class WebsitePreviewZip implements WebsitePreview {
             byte[] buffer = new byte[4096];
             int len = 0;
             String fileName = null;
+            String fileExtension = null;
 
             // Try to explore it as a zip, if it's not a zip it will fail
             try {
@@ -167,27 +169,49 @@ public class WebsitePreviewZip implements WebsitePreview {
                 while (entries.hasMoreElements()) {
                     ZipEntry entry = entries.nextElement();
                     if(entry.getName().equals(relativePath)) {
-                        resourceBlob = Blobs.createBlobWithExtension(".html");
+                        fileName = entry.getName();
+                        int idx = fileName.lastIndexOf('/');
+                        if (idx > -1) {
+                            fileName = fileName.substring(idx + 1);
+                        }
+                        fileExtension = FilenameUtils.getExtension(fileName);
+                        resourceBlob = Blobs.createBlobWithExtension("." + fileExtension);
+
                         FileOutputStream fos = new FileOutputStream(resourceBlob.getFile());
                         InputStream zipEntryStream = zipFile.getInputStream(entry);
                         while ((len = zipEntryStream.read(buffer)) > 0) {
                             fos.write(buffer, 0, len);
                         }
                         fos.close();
-
-                        fileName = entry.getName();
-                        int idx = fileName.lastIndexOf('/');
-                        if(idx > -1) {
-                            fileName = fileName.substring(idx + 1);
-                        }
                         break;
                     }
                 }
 
                 // Now handle the mimetype
+                // Unfortunately, mimetype for some files is problematic...
+                // (getMimeTyeFromBlob() for example returns text/plain for a .js file,
+                // getMimeTypeFromFileName throws a mimeTypeNotFound exception for ".js", etc.
+                // Let's work aroudn this quickly
+                // BUT:
+                // TODO: Update mimetype registry...
                 resourceBlob.setFilename(fileName);
-                MimetypeRegistryService service = (MimetypeRegistryService) Framework.getService(MimetypeRegistry.class);
-                String mimeType = service.getMimetypeFromFilename(fileName);
+                
+                String mimeType;
+                MimetypeRegistryService service = (MimetypeRegistryService) Framework.getService(
+                         MimetypeRegistry.class);
+                if(fileExtension == null) {
+                    mimeType = service.getMimetypeFromBlob(resourceBlob);
+                } else {
+                    switch (fileExtension.toLowerCase()) {
+                    case "js":
+                        mimeType = "application/javascript";
+                        break;
+
+                      default:
+                        mimeType = service.getMimetypeFromFilename(fileName);
+                        break;
+                    }
+                }
                 resourceBlob.setMimeType(mimeType);
 
             } catch (java.io.IOException e) {

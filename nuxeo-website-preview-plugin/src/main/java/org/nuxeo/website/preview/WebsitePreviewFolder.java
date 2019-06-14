@@ -201,10 +201,17 @@ public class WebsitePreviewFolder implements WebsitePreview {
                 // Pb in some browsers. Returning text/plain as mimetype instead of text/css makes
                 // the browser to ignore the file, or even log a 404. It is mainly when there is a
                 // <link> that explicitely asks for text/css and we return text/plain
+                // 2019-06-13: We do have issues with mimetype. a .js file is returned as text/plain
+                // NO TIME TO DIG >E NEED THIS FOR A DEMO "NOW"
+                // => adding for css and for js
                 String ext = FilenameUtils.getExtension(fileName);
                 if (ext != null && "css".equalsIgnoreCase(ext) && !"text/css".equalsIgnoreCase(mimeType)) {
                     log.warn("Adjusting mimeType for css for " + path);
                     blob.setMimeType("text/css");
+                }
+                if (ext != null && "js".equalsIgnoreCase(ext) && !"application/javascript".equalsIgnoreCase(mimeType)) {
+                    log.warn("Adjusting mimeType for js for " + path);
+                    blob.setMimeType("application/javascript");
                 }
             }
         }
