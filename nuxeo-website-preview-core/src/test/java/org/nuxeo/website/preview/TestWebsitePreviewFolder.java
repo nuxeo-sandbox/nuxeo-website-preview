@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
 @Features(AutomationFeature.class)
 @RepositoryConfig(init = DefaultRepositoryInit.class, cleanup = Granularity.METHOD)
 @Deploy({
-    "nuxeo-website-preview"
+    "nuxeo-website-preview-core"
 })
 public class TestWebsitePreviewFolder {
 

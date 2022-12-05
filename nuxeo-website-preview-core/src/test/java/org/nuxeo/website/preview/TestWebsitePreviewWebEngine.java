@@ -52,7 +52,7 @@ import static org.junit.Assert.*;
 @Features({RestServerFeature.class})
 @RepositoryConfig(init = DefaultRepositoryInit.class, cleanup = Granularity.METHOD)
 @Deploy({
-    "nuxeo-website-preview"
+    "nuxeo-website-preview-core"
 })
 public class TestWebsitePreviewWebEngine extends BaseTest {
 
