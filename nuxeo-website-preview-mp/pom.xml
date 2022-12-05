@@ -24,7 +24,7 @@
     <!-- Additional bundles to be deployed by the MP -->
     <dependency>
       <groupId>nuxeo-website-preview</groupId>
-      <artifactId>nuxeo-website-preview-plugin</artifactId>
+      <artifactId>nuxeo-website-preview-core</artifactId>
     </dependency>
   </dependencies>
   

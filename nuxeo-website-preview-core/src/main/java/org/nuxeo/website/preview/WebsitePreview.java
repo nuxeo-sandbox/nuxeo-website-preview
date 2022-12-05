@@ -49,7 +49,7 @@ public interface WebsitePreview {
      * <p>
      * DocumentNotFoundException is returned if mainDoc does not exist, or, for implementaiton based on DocumentModel,
      * no such document is found at the relative path. For file based implementaitons (like searching in a zip), the
-     * method should returns null when there is no such entry on disk.
+     * method should return null when there is no such entry on disk.
      *
      * @param session
      * @param mainDoc

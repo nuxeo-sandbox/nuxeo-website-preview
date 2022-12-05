@@ -22,7 +22,8 @@
   </properties>
 
   <modules>
-    <module>nuxeo-website-preview-plugin</module>
+    <module>nuxeo-website-preview-core</module>
+    <module>nuxeo-website-preview-webui</module>
     <module>nuxeo-website-preview-mp</module>
   </modules>
 
@@ -30,7 +31,12 @@
     <dependencies>
       <dependency>
         <groupId>nuxeo-website-preview</groupId>
-        <artifactId>nuxeo-website-preview-plugin</artifactId>
+        <artifactId>nuxeo-website-preview-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nuxeo-website-preview</groupId>
+        <artifactId>nuxeo-website-preview-webui</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
