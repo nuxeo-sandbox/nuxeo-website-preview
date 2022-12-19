@@ -11,7 +11,7 @@
   <groupId>nuxeo-website-preview</groupId>
   <artifactId>nuxeo-website-preview-parent</artifactId>
   <name>Parent Project for Nuxeo Website Preview</name>
-  <version>2021.0.0-SNAPSHOT</version>
+  <version>2021.1.0-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <description />
