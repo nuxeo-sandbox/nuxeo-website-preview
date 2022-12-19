@@ -15,12 +15,7 @@
 
   <!-- Declare the facet, used as a boolean, for testing in UI or elsewhere -->
   <extension point="doctype" target="org.nuxeo.ecm.core.schema.TypeService">
-    <facet name="WebsitePreviewAvailable"></facet>
-  </extension>
-
-  <!-- Operations -->
-  <extension point="operations" target="org.nuxeo.ecm.core.operation.OperationServiceComponent">
-    <operation class="org.nuxeo.website.preview.operations.HasWebsite" />
+    <facet name="Web"></facet>
   </extension>
 
 </component>
