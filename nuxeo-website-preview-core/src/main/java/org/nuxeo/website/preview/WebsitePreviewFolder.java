@@ -45,7 +45,7 @@ public class WebsitePreviewFolder implements WebsitePreview {
     public static double CACHE_CLEAN_RATIO = 0.2;
 
     // Caching, to avoid doing too many NXQL.
-    protected static LinkedHashMap<String, DocumentModel> parentIdAndMainHtml = new LinkedHashMap<String, DocumentModel>();
+    protected static LinkedHashMap<String, DocumentModel> parentIdAndMainHtml = new LinkedHashMap<>();
 
     protected CoreSession session;
 
@@ -75,8 +75,6 @@ public class WebsitePreviewFolder implements WebsitePreview {
      * <li>Current user has not enough right to read (either read the parent or the child)</li>
      * </ul>
      *
-     * @param session
-     * @param parent, the root parent
      * @return
      * @since 9.10
      */
@@ -143,7 +141,7 @@ public class WebsitePreviewFolder implements WebsitePreview {
                              */
                             mainBlob = (Blob) child.getPropertyValue("file:content");
                             fileName = mainBlob.getFilename();
-                            if (mainHtmlDoc != null && fileName.toLowerCase().indexOf("index.html") == 0) {
+                            if (fileName.toLowerCase().indexOf("index.html") == 0) {
                                 break;
                             }
                         }
@@ -170,8 +168,7 @@ public class WebsitePreviewFolder implements WebsitePreview {
     /**
      * Finds the document inside the mainfolde,r based on the relative path, returns the blob
      *
-     * @param session
-     * @param mainDoc
+     * @param relativePath
      * @return the blob of the corresponding document
      * @throws DocumentNotFoundException
      * @since 9.10
@@ -205,11 +202,11 @@ public class WebsitePreviewFolder implements WebsitePreview {
                 // NO TIME TO DIG >E NEED THIS FOR A DEMO "NOW"
                 // => adding for css and for js
                 String ext = FilenameUtils.getExtension(fileName);
-                if (ext != null && "css".equalsIgnoreCase(ext) && !"text/css".equalsIgnoreCase(mimeType)) {
+                if ("css".equalsIgnoreCase(ext) && !"text/css".equalsIgnoreCase(mimeType)) {
                     log.warn("Adjusting mimeType for css for " + path);
                     blob.setMimeType("text/css");
                 }
-                if (ext != null && "js".equalsIgnoreCase(ext) && !"application/javascript".equalsIgnoreCase(mimeType)) {
+                if ("js".equalsIgnoreCase(ext) && !"application/javascript".equalsIgnoreCase(mimeType)) {
                     log.warn("Adjusting mimeType for js for " + path);
                     blob.setMimeType("application/javascript");
                 }

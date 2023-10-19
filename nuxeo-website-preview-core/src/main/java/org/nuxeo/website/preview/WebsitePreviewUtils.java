@@ -36,11 +36,11 @@ public class WebsitePreviewUtils {
     protected static final Logger log = LogManager.getLogger(WebsitePreviewUtils.class);
 
     // Caching, to avoid doing too many NXQL.
-    protected static LinkedHashMap<String, DocumentModel> parentIdAndMainHtml = new LinkedHashMap<String, DocumentModel>();
+    protected static LinkedHashMap<String, DocumentModel> parentIdAndMainHtml = new LinkedHashMap<>();
 
     public enum TYPE {
         ZIP, FOLDER, NOT_AND_EMBEDDED_WEBSITE
-    };
+    }
 
     /**
      * Looks for the "main" html file in the input document. If it is a folder, looks at first level, if it is a not,
@@ -133,7 +133,7 @@ public class WebsitePreviewUtils {
             }
         }
 
-        if (mainBlob == null && doc.hasSchema("file")) {
+        if (doc.hasSchema("file")) {
             WebsitePreviewZip wspZip = new WebsitePreviewZip(session, doc);
             mainBlob = wspZip.getMainHtmlBlob();
             if (mainBlob != null) {

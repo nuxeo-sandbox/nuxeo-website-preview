@@ -26,7 +26,7 @@ import org.nuxeo.ecm.core.api.DocumentNotFoundException;
  */
 public interface WebsitePreview {
 
-    public static final String FACET = "WebsitePreviewAvailable";
+    String FACET = "WebsitePreviewAvailable";
 
     /**
      * Returns the main html file corresponding to the mainDoc. If mainDoc itself is not found, raised
@@ -37,12 +37,10 @@ public interface WebsitePreview {
      * {@link WebsitePreviewFolder} for an example.
      * <p>
      *
-     * @param session
-     * @param parent, the root parent
      * @return
      * @since 9.10
      */
-    public Blob getMainHtmlBlob() throws DocumentNotFoundException;
+    Blob getMainHtmlBlob() throws DocumentNotFoundException;
 
     /**
      * Retrieves a blob based on its relative path from the main document, returns null if not found.
@@ -51,11 +49,10 @@ public interface WebsitePreview {
      * no such document is found at the relative path. For file based implementaitons (like searching in a zip), the
      * method should return null when there is no such entry on disk.
      *
-     * @param session
-     * @param mainDoc
+     * @param relativePath
      * @return the blob of the corresponding document
      * @throws DocumentNotFoundException
      * @since 9.10
      */
-    public Blob getResource(String relativePath) throws DocumentNotFoundException;
+    Blob getResource(String relativePath) throws DocumentNotFoundException;
 }

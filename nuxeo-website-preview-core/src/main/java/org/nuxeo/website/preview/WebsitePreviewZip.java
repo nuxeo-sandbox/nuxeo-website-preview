@@ -87,12 +87,12 @@ public class WebsitePreviewZip implements WebsitePreview {
             try {
                 File zipBlobFile = blob.getFile();
                 zipFile = new ZipFile(zipBlobFile);
-                Map<String, ZipEntry> htmlEntries = new HashMap();
+                Map<String, ZipEntry> htmlEntries = new HashMap<>();
                 Enumeration<? extends ZipEntry> entries = zipFile.entries();
                 while (entries.hasMoreElements()) {
                     ZipEntry entry = entries.nextElement();
                     String nameLC = entry.getName().toLowerCase();
-                    if (!entry.isDirectory() && nameLC.indexOf("/") < 0) {
+                    if (!entry.isDirectory() && !nameLC.contains("/")) {
                         if (nameLC.endsWith(".html") || nameLC.endsWith(".htm")) {
                             htmlEntries.put(nameLC, entry);
                             if (nameLC.equals("index.html")) {
@@ -103,7 +103,7 @@ public class WebsitePreviewZip implements WebsitePreview {
                 }
                 // Find index.html
                 ZipEntry entry = htmlEntries.get("index.html");
-                if (entry == null && htmlEntries.size() > 0) {
+                if (entry == null && !htmlEntries.isEmpty()) {
                     // Get any file, first one will do it
                     entry = htmlEntries.entrySet().iterator().next().getValue();
                 }
@@ -199,14 +199,10 @@ public class WebsitePreviewZip implements WebsitePreview {
                 if(fileExtension == null) {
                     mimeType = service.getMimetypeFromBlob(resourceBlob);
                 } else {
-                    switch (fileExtension.toLowerCase()) {
-                    case "js":
+                    if (fileExtension.equalsIgnoreCase("js")) {
                         mimeType = "application/javascript";
-                        break;
-
-                    default:
+                    } else {
                         mimeType = service.getMimetypeFromFilename(fileName);
-                        break;
                     }
                 }
                 resourceBlob.setMimeType(mimeType);
