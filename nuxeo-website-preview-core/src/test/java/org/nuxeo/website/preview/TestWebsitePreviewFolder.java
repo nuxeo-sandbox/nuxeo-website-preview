@@ -43,9 +43,7 @@ import org.nuxeo.runtime.transaction.TransactionHelper;
 @RunWith(FeaturesRunner.class)
 @Features(AutomationFeature.class)
 @RepositoryConfig(init = DefaultRepositoryInit.class, cleanup = Granularity.METHOD)
-@Deploy({
-    "nuxeo-website-preview-core"
-})
+@Deploy({ "nuxeo-website-preview-core" })
 public class TestWebsitePreviewFolder {
 
     public static final String LOGO_FILE_NAME = "NUXEO-LOGO-1.png";

@@ -18,6 +18,14 @@
  */
 package org.nuxeo.website.preview;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+
+import javax.inject.Inject;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -43,17 +51,10 @@ import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.ServletContainerFeature;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
-import javax.inject.Inject;
-import java.io.IOException;
-
-import static org.junit.Assert.*;
-
 @RunWith(FeaturesRunner.class)
-@Features({RestServerFeature.class})
+@Features({ RestServerFeature.class })
 @RepositoryConfig(init = DefaultRepositoryInit.class, cleanup = Granularity.METHOD)
-@Deploy({
-    "nuxeo-website-preview-core"
-})
+@Deploy({ "nuxeo-website-preview-core" })
 public class TestWebsitePreviewWebEngine extends BaseTest {
 
     public static final String BASE_URL = "http://localhost";
@@ -93,7 +94,8 @@ public class TestWebsitePreviewWebEngine extends BaseTest {
     public void testTypeIsWebsiteFolder() throws IOException {
 
         // Testing with a zip
-        DocumentModel doc = TestUtils.createDocumentFromFile(session, testDocsFolder, "File", "WSP-html-just-index.zip");
+        DocumentModel doc = TestUtils.createDocumentFromFile(session, testDocsFolder, "File",
+                "WSP-html-just-index.zip");
         assertNotNull(doc);
 
         // Save for good
@@ -105,10 +107,10 @@ public class TestWebsitePreviewWebEngine extends BaseTest {
 
         // Get the main HTML page
         int port = servletContainerFeature.getPort();
-        String url = BASE_URL + ":"+port+"/WSP/" + doc.getId() + "/index.html";
+        String url = BASE_URL + ":" + port + "/WSP/" + doc.getId() + "/index.html";
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(url);
-            //request.setHeader(HttpHeaders.CONTENT_TYPE, "text/html" /*"application/json"*/);
+            // request.setHeader(HttpHeaders.CONTENT_TYPE, "text/html" /*"application/json"*/);
             request.setHeader(HttpHeaders.AUTHORIZATION, "Basic QWRtaW5pc3RyYXRvcjpBZG1pbmlzdHJhdG9y");
             try (CloseableHttpResponse response = client.execute(request)) {
 
@@ -124,10 +126,10 @@ public class TestWebsitePreviewWebEngine extends BaseTest {
         }
 
         // Get the logo
-        url = BASE_URL + ":"+port+ "/WSP/" + doc.getId() + "/" + PATH_TO_LOGO;
+        url = BASE_URL + ":" + port + "/WSP/" + doc.getId() + "/" + PATH_TO_LOGO;
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(url);
-            //request.setHeader(HttpHeaders.CONTENT_TYPE, "text/html" /*"application/json"*/);
+            // request.setHeader(HttpHeaders.CONTENT_TYPE, "text/html" /*"application/json"*/);
             request.setHeader(HttpHeaders.AUTHORIZATION, "Basic QWRtaW5pc3RyYXRvcjpBZG1pbmlzdHJhdG9y");
             try (CloseableHttpResponse response = client.execute(request)) {
 
@@ -138,8 +140,6 @@ public class TestWebsitePreviewWebEngine extends BaseTest {
             }
         }
 
-
     }
-
 
 }

@@ -19,6 +19,7 @@
 package org.nuxeo.website.preview;
 
 import java.io.File;
+
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;

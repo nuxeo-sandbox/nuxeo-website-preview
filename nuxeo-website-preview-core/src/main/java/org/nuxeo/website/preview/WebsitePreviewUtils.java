@@ -38,10 +38,6 @@ public class WebsitePreviewUtils {
     // Caching, to avoid doing too many NXQL.
     protected static LinkedHashMap<String, DocumentModel> parentIdAndMainHtml = new LinkedHashMap<>();
 
-    public enum TYPE {
-        ZIP, FOLDER, NOT_AND_EMBEDDED_WEBSITE
-    }
-
     /**
      * Looks for the "main" html file in the input document. If it is a folder, looks at first level, if it is a not,
      * looks inside the blob, expected to be a zip (or unzippable) blob, and looks at first level.
@@ -142,6 +138,10 @@ public class WebsitePreviewUtils {
         }
 
         return TYPE.NOT_AND_EMBEDDED_WEBSITE;
+    }
+
+    public enum TYPE {
+        ZIP, FOLDER, NOT_AND_EMBEDDED_WEBSITE
     }
 
 }

@@ -35,13 +35,10 @@ import org.nuxeo.ecm.webengine.model.impl.ModuleRoot;
 @WebObject(type = "WebsitePreviewWE")
 public class WebsitePreviewWE extends ModuleRoot {
 
+    public static final String PREFIX_PATH = "/WSP";
+    public static final String MAIN_URL_SUFFIX = "/index.html";
     @SuppressWarnings("unused")
     protected static final Logger log = LogManager.getLogger(WebsitePreviewWE.class);
-
-    public static final String PREFIX_PATH = "/WSP";
-
-    public static final String MAIN_URL_SUFFIX = "/index.html";
-
     protected static String BASE_URL = null;
 
     // Main call. This is the ID of the Folderish containing the html files, not the id of a subfile

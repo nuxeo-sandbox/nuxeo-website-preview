@@ -47,10 +47,8 @@ import org.nuxeo.runtime.api.Framework;
  */
 public class WebsitePreviewZip implements WebsitePreview {
 
-    protected static final Logger log = LogManager.getLogger(WebsitePreviewZip.class);
-
     public static final String MAIN_TEMP_FOLDER_NAME = "WebsitePreviewZip";
-
+    protected static final Logger log = LogManager.getLogger(WebsitePreviewZip.class);
     public static File mainTempFolderFile = null;
 
     protected CoreSession session;
@@ -196,7 +194,7 @@ public class WebsitePreviewZip implements WebsitePreview {
                 String mimeType;
                 MimetypeRegistryService service = (MimetypeRegistryService) Framework.getService(
                         MimetypeRegistry.class);
-                if(fileExtension == null) {
+                if (fileExtension == null) {
                     mimeType = service.getMimetypeFromBlob(resourceBlob);
                 } else {
                     if (fileExtension.equalsIgnoreCase("js")) {

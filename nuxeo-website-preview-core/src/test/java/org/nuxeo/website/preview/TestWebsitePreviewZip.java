@@ -18,6 +18,12 @@
  */
 package org.nuxeo.website.preview;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import javax.inject.Inject;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,9 +38,6 @@ import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
-import javax.inject.Inject;
-
-import static org.junit.Assert.*;
 
 @RunWith(FeaturesRunner.class)
 @Features(AutomationFeature.class)
@@ -72,7 +75,8 @@ public class TestWebsitePreviewZip {
     @Test
     public void testTypeIsWebsiteFolder() {
 
-        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File", "WSP-html-just-index.zip");
+        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File",
+                "WSP-html-just-index.zip");
         assertNotNull(doc);
 
         assertEquals(WebsitePreviewUtils.TYPE.ZIP, WebsitePreviewUtils.getType(coreSession, doc));
@@ -81,7 +85,8 @@ public class TestWebsitePreviewZip {
     @Test
     public void testWithSingleHtmlIndex() {
 
-        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File", "WSP-html-just-index.zip");
+        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File",
+                "WSP-html-just-index.zip");
         assertNotNull(doc);
 
         Blob result = WebsitePreviewUtils.getMainHtmlBlob(coreSession, doc);
@@ -93,7 +98,8 @@ public class TestWebsitePreviewZip {
     @Test
     public void testWithHtmlButNoIndexFile() {
 
-        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File", "WSP-html-no-index-file.zip");
+        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File",
+                "WSP-html-no-index-file.zip");
         assertNotNull(doc);
 
         Blob result = WebsitePreviewUtils.getMainHtmlBlob(coreSession, doc);
@@ -104,7 +110,8 @@ public class TestWebsitePreviewZip {
     @Test
     public void testWithSeveralHtmlAndIndexFile() {
 
-        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File", "WSP-html-several-and-index.zip");
+        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File",
+                "WSP-html-several-and-index.zip");
         assertNotNull(doc);
 
         Blob result = WebsitePreviewUtils.getMainHtmlBlob(coreSession, doc);
@@ -128,7 +135,8 @@ public class TestWebsitePreviewZip {
     @Test
     public void testgetResource() {
 
-        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File", "WSP-html-several-and-index.zip");
+        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File",
+                "WSP-html-several-and-index.zip");
         assertNotNull(doc);
 
         Blob result = WebsitePreviewUtils.getResource(coreSession, doc, PATH_TO_LOGO);

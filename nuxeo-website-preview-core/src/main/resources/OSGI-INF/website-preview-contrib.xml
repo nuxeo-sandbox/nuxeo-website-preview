@@ -1,22 +1,22 @@
 <component name="org.nuxeo.website.preview.component">
 
-  <!-- See WebsiteObject#getResource: Some browser fails if a .css file has the text/plain mimetype -->
-  <extension target="org.nuxeo.ecm.platform.mimetype.service.MimetypeRegistryService" point="mimetype">
-    <mimetype normalized="text/css" binary="false" iconPath="text.png">
-      <mimetypes>
-        <mimetype>text/css</mimetype>
-        <mimetype>text/plain</mimetype>
-      </mimetypes>
-      <extensions>
-        <extension>css</extension>
-      </extensions>
-    </mimetype>
-  </extension>
+    <!-- See WebsiteObject#getResource: Some browser fails if a .css file has the text/plain mimetype -->
+    <extension target="org.nuxeo.ecm.platform.mimetype.service.MimetypeRegistryService" point="mimetype">
+        <mimetype normalized="text/css" binary="false" iconPath="text.png">
+            <mimetypes>
+                <mimetype>text/css</mimetype>
+                <mimetype>text/plain</mimetype>
+            </mimetypes>
+            <extensions>
+                <extension>css</extension>
+            </extensions>
+        </mimetype>
+    </extension>
 
-  <!-- Declare the facet, used as a boolean, for testing in UI or elsewhere -->
-  <extension point="doctype" target="org.nuxeo.ecm.core.schema.TypeService">
-    <facet name="Web"></facet>
-  </extension>
+    <!-- Declare the facet, used as a boolean, for testing in UI or elsewhere -->
+    <extension point="doctype" target="org.nuxeo.ecm.core.schema.TypeService">
+        <facet name="Web"></facet>
+    </extension>
 
 </component>
 
