@@ -5,20 +5,20 @@
   <parent>
     <groupId>org.nuxeo</groupId>
     <artifactId>nuxeo-parent</artifactId>
-    <version>2021.29</version>
+    <version>2023.2</version>
   </parent>
 
   <groupId>nuxeo-website-preview</groupId>
   <artifactId>nuxeo-website-preview-parent</artifactId>
   <name>Parent Project for Nuxeo Website Preview</name>
-  <version>2021.1.0-SNAPSHOT</version>
+  <version>2023.0.0-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <description />
 
   <properties>
     <nuxeo.skip.enforcer>true</nuxeo.skip.enforcer>
-    <nuxeo.target.version>2021.*</nuxeo.target.version>
+    <nuxeo.target.version>2023.*</nuxeo.target.version>
   </properties>
 
   <modules>

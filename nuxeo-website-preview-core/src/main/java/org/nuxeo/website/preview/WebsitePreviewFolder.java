@@ -23,8 +23,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
@@ -37,7 +37,7 @@ import org.nuxeo.ecm.core.api.PathRef;
  */
 public class WebsitePreviewFolder implements WebsitePreview {
 
-    private static final Log log = LogFactory.getLog(WebsitePreviewFolder.class);
+    protected static final Logger log = LogManager.getLogger(WebsitePreviewFolder.class);
 
     public static int MAX_ELEMENTS_IN_CACHE = 500;
 

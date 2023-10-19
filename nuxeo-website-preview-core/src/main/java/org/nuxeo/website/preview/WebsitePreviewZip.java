@@ -30,8 +30,8 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.nuxeo.common.Environment;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.Blobs;
@@ -47,7 +47,7 @@ import org.nuxeo.runtime.api.Framework;
  */
 public class WebsitePreviewZip implements WebsitePreview {
 
-    private static final Log log = LogFactory.getLog(WebsitePreviewZip.class);
+    protected static final Logger log = LogManager.getLogger(WebsitePreviewZip.class);
 
     public static final String MAIN_TEMP_FOLDER_NAME = "WebsitePreviewZip";
 
@@ -203,7 +203,7 @@ public class WebsitePreviewZip implements WebsitePreview {
                     case "js":
                         mimeType = "application/javascript";
                         break;
-    
+
                     default:
                         mimeType = service.getMimetypeFromFilename(fileName);
                         break;

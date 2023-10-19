@@ -26,8 +26,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentNotFoundException;
@@ -43,7 +43,7 @@ import org.nuxeo.ecm.webengine.model.impl.DefaultObject;
 public class WebsiteObject extends DefaultObject {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(WebsiteObject.class);
+    protected static final Logger log = LogManager.getLogger(WebsiteObject.class);
 
     // The main fodler, containing the files
     DocumentModel mainDocument = null;

@@ -22,8 +22,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.nuxeo.ecm.webengine.model.WebObject;
 import org.nuxeo.ecm.webengine.model.impl.ModuleRoot;
 
@@ -36,12 +36,12 @@ import org.nuxeo.ecm.webengine.model.impl.ModuleRoot;
 public class WebsitePreviewWE extends ModuleRoot {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(WebsitePreviewWE.class);
+    protected static final Logger log = LogManager.getLogger(WebsitePreviewWE.class);
 
     public static final String PREFIX_PATH = "/WSP";
 
     public static final String MAIN_URL_SUFFIX = "/index.html";
-    
+
     protected static String BASE_URL = null;
 
     // Main call. This is the ID of the Folderish containing the html files, not the id of a subfile

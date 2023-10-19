@@ -20,8 +20,8 @@ package org.nuxeo.website.preview;
 
 import java.util.LinkedHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
@@ -33,7 +33,7 @@ import org.nuxeo.ecm.core.api.DocumentNotFoundException;
 public class WebsitePreviewUtils {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(WebsitePreviewUtils.class);
+    protected static final Logger log = LogManager.getLogger(WebsitePreviewUtils.class);
 
     // Caching, to avoid doing too many NXQL.
     protected static LinkedHashMap<String, DocumentModel> parentIdAndMainHtml = new LinkedHashMap<String, DocumentModel>();
