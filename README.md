@@ -1,5 +1,8 @@
 # nuxeo-website-preview
 
+> [!WARNING]
+> This README is not up-to-date. For example, the operation has been removed the facet renamed "Web"
+> Be cautious, look at the code until we find time to update it
 
 This plug-in allows to display a website stored in Nuxeo either as:
 
