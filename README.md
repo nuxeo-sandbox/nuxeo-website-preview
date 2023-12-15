@@ -1,9 +1,5 @@
 # nuxeo-website-preview
 
-> [!WARNING]
-> This README is not up-to-date. For example, the operation has been removed the facet renamed "Web"
-> Be cautious, look at the code until we find time to update it
-
 This plug-in allows to display a website stored in Nuxeo either as:
 
 * A `Folderish` Document containing the site, with relative paths. So for example, an index.html file with an `img` tag whose `src` attribute is `"img/logo.png"`,  and at first level of the Document, there is an `img` folder containing the logo.png Picture document
