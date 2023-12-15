@@ -18,6 +18,9 @@
  */
 package org.nuxeo.website.preview;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -26,11 +29,14 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.nuxeo.ecm.core.api.Blob;
+import org.nuxeo.ecm.core.api.Blobs;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.api.DocumentNotFoundException;
+import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.PathRef;
+import org.nuxeo.runtime.api.Framework;
 
 /**
  * @since 9.10
@@ -83,7 +89,7 @@ public class WebsitePreviewFolder implements WebsitePreview {
 
         DocumentModel mainHtmlDoc = null;
 
-        // Don't loose tipme processing
+        // Don't loose time processing
         if (mainParent == null || !mainParent.hasFacet("Folderish")) {
             return null;
         }
@@ -99,7 +105,7 @@ public class WebsitePreviewFolder implements WebsitePreview {
                 }
                 for (String oneKey : keys) {
                     parentIdAndMainHtml.remove(oneKey);
-                    parentIdAndMainHtml.remove(oneKey);
+
                 }
             }
         }
@@ -121,8 +127,9 @@ public class WebsitePreviewFolder implements WebsitePreview {
                 if (mainHtmlDoc == null) {
                     // Must find a .html file in first children
                     String nxql = "SELECT * FROM Document WHERE ecm:parentId = '" + mainParent.getId() + "'"
-                            + " AND (content/mime-type ILIKE '%html' OR content/name ILIKE '%html%' OR content/name ILIKE '%htm')"
-                            + " AND ecm:mixinType != 'HiddenInNavigation' AND ecm:isProxy = 0 AND ecm:isVersion = 0 AND ecm:currentLifeCycleState != 'deleted'";
+                            + " AND (content/mime-type ILIKE '%html' OR content/name ILIKE '%html' OR content/name ILIKE '%htm'"
+                            + " OR note:mime_type = 'text/html')"
+                            + " AND ecm:mixinType != 'HiddenInNavigation' AND ecm:isProxy = 0 AND ecm:isVersion = 0 AND ecm:isTrashed = 0";
                     DocumentModelList children = session.query(nxql);
 
                     if (children.size() == 1) {
@@ -134,13 +141,18 @@ public class WebsitePreviewFolder implements WebsitePreview {
 
                             mainHtmlDoc = child;
                             /*
-                             * Because of the nxql we did, we know the document has a blob, and the html mime type, no
-                             * need to try-catch or check things (we could be hysterical: Maybe in the microseconds, the
-                             * document has been removed or it's permissions changed... The error will then be thrown
-                             * and that's all.
+                             * Because of the NXQL we did, we know we have:
+                             * - An html blob
+                             * - Or an html note. In this case, the document title must be index.html
                              */
-                            mainBlob = (Blob) child.getPropertyValue("file:content");
-                            fileName = mainBlob.getFilename();
+                            if (child.hasSchema("file")) {
+                                mainBlob = (Blob) child.getPropertyValue("file:content");
+                                fileName = mainBlob.getFilename();
+                            } else if (child.hasSchema("note")) {
+                                fileName = mainHtmlDoc.getTitle();
+                            } else {
+                                fileName = "";
+                            }
                             if (fileName.toLowerCase().indexOf("index.html") == 0) {
                                 break;
                             }
@@ -158,15 +170,50 @@ public class WebsitePreviewFolder implements WebsitePreview {
             }
         }
 
-        if (mainHtmlDoc != null && mainHtmlDoc.hasSchema("file")) {
-            return (Blob) mainHtmlDoc.getPropertyValue("file:content");
+        if (mainHtmlDoc != null) {
+            return getBlob(mainHtmlDoc);
+        }
+
+        return null;
+    }
+
+    /*
+     * Returns the "file:content" if any. If the doc is a NOte, returns a temp. blob.
+     * <br>
+     * If doc is a Note, the filename of the blob is set to the dc:title of the Note.
+     */
+    protected Blob getBlob(DocumentModel doc) {
+
+        if (doc.hasSchema("file")) {
+            return (Blob) doc.getPropertyValue("file:content");
+        }
+
+        if (doc.hasSchema("note")) {
+            String content = (String) doc.getPropertyValue("note:note");
+            String mimeType = (String) doc.getPropertyValue("note:mime_type");
+
+            String fileName = doc.getTitle();
+            String baseName = FilenameUtils.getBaseName(fileName);
+            String ext = FilenameUtils.getExtension(fileName);
+            try {
+                File tempFile = Framework.createTempFile(baseName, "." + ext);
+
+                org.apache.commons.io.FileUtils.writeStringToFile(tempFile, content, StandardCharsets.UTF_8.name());
+                Blob tempBlob = Blobs.createBlob(tempFile, mimeType);
+                tempBlob.setFilename(fileName);
+                
+                return tempBlob;
+                
+            } catch (IOException e) {
+                throw new NuxeoException(e);
+            }
         }
 
         return null;
     }
 
     /**
-     * Finds the document inside the mainfolde,r based on the relative path, returns the blob
+     * Finds the document inside the mainfolder based on the relative path, returns the blob
      *
      * @param relativePath
      * @return the blob of the corresponding document
@@ -183,33 +230,27 @@ public class WebsitePreviewFolder implements WebsitePreview {
         DocumentModel doc = null;
         doc = session.getDocument(new PathRef(path));
 
-        if (!doc.hasSchema("file")) {
+        blob = getBlob(doc);
+        if (blob == null) {
             log.warn("Document " + path + " has no blob");
         } else {
-            blob = (Blob) doc.getPropertyValue("file:content");
-            if (blob == null) {
-                log.warn("Document " + path + " has no blob");
-            } else {
+            String fileName = blob.getFilename();
+            String mimeType = blob.getMimeType();
 
-                String fileName = blob.getFilename();
-                String mimeType = blob.getMimeType();
-
-                // Assume there is a file name. If null, we'll fail miserably with a NPE
-                // Pb in some browsers. Returning text/plain as mimetype instead of text/css makes
-                // the browser to ignore the file, or even log a 404. It is mainly when there is a
-                // <link> that explicitely asks for text/css and we return text/plain
-                // 2019-06-13: We do have issues with mimetype. a .js file is returned as text/plain
-                // NO TIME TO DIG >E NEED THIS FOR A DEMO "NOW"
-                // => adding for css and for js
-                String ext = FilenameUtils.getExtension(fileName);
-                if ("css".equalsIgnoreCase(ext) && !"text/css".equalsIgnoreCase(mimeType)) {
-                    log.warn("Adjusting mimeType for css for " + path);
-                    blob.setMimeType("text/css");
-                }
-                if ("js".equalsIgnoreCase(ext) && !"application/javascript".equalsIgnoreCase(mimeType)) {
-                    log.warn("Adjusting mimeType for js for " + path);
-                    blob.setMimeType("application/javascript");
-                }
+            // Assume there is a file name. If null, we'll fail miserably with a NPE
+            // Pb in some browsers. Returning text/plain as mimetype instead of text/css makes
+            // the browser to ignore the file, or even log a 404. It is mainly when there is a
+            // <link> that explicitely asks for text/css and we return text/plain
+            // 2019-06-13: We do have issues with mimetype. a .js file is returned as text/plain
+            // => adding for css and for js
+            String ext = FilenameUtils.getExtension(fileName);
+            if ("css".equalsIgnoreCase(ext) && !"text/css".equalsIgnoreCase(mimeType)) {
+                log.warn("Adjusting mimeType for css for " + path);
+                blob.setMimeType("text/css");
+            }
+            if ("js".equalsIgnoreCase(ext) && !"application/javascript".equalsIgnoreCase(mimeType)) {
+                log.warn("Adjusting mimeType for js for " + path);
+                blob.setMimeType("application/javascript");
             }
         }
 

@@ -104,7 +104,7 @@ public class WebsitePreviewUtils {
      * @return
      * @since 9.10
      */
-    public static boolean hasMiniSite(CoreSession session, DocumentModel doc) {
+    public static boolean hasWebsite(CoreSession session, DocumentModel doc) {
         return doc.hasFacet(WebsitePreview.FACET) || WebsitePreviewUtils.getMainHtmlBlob(session, doc) != null;
     }
 

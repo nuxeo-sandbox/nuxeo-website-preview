@@ -26,7 +26,7 @@ import org.nuxeo.ecm.core.api.DocumentNotFoundException;
  */
 public interface WebsitePreview {
 
-    String FACET = "WebsitePreviewAvailable";
+    String FACET = "Website";
 
     /**
      * Returns the main html file corresponding to the mainDoc. If mainDoc itself is not found, raised

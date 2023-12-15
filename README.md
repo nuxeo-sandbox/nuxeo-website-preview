@@ -20,7 +20,7 @@ This plug-in allows to display a website stored in Nuxeo either as:
 
 The plug-in creates a _WebEngine_ module allowing to access the embedded website _via_ a URL. The name of the module (in the URLs) is `WSP` (WebSitePreview).
 
-* In order tp be as easy possible to use, the main url _must_ end with `index.html`, _whatever the real name of your main html file_.
+* In order to be as easy possible to use, the main url _must_ end with `index.html`, _whatever the real name of your main html file_.
 
 * So, to access the preview(*), the URL to use is:
     `{server:port}/nuxeo/site/WSP/main-parent-doc-id/index.html`
@@ -31,21 +31,21 @@ The plug-in creates a _WebEngine_ module allowing to access the embedded website
 
   The exact same URL is used if instead of a `Folderish` containing all the website as Nuxeo documents, it is a `File` whose `file:content` holds a zip containing the website
 
-* The plugin contributes the `WebsitePreviewAvailable` facet:
+* The plugin contributes the `Website` facet:
   * Because not every `Folderish` and not every .zip host a website 
-  * So you can dynamically add/remove (using the native `Document.AddFacet` and `Document.RemoveFacet` operaitons) this facet from your documents for quick test to display a "preview" button in the UI for example
+  * So you can dynamically add/remove (using the `Document.AddFacet` and `Document.RemoveFacet` operations) this facet from your documents for quick test to display a "preview" button in the UI for example
   * **IMPORTANT**: The plugin does not add/remove this facet at anytime, it is for you to use.
-    * A typical example would be a button in the UI, like "This is a website". The user clicks it and you run the `Document.Addfacet` operation to add the `WebsitePreviewAvailable` facet.
-    * This could also be done automatically in a listener depending on some metadata and rules, and if the `Document.HasMinisite` operation returns `true` (see below).
+    * A typical example would be a button in the UI, like "This is a website". The user clicks it and you run the `Document.Addfacet` operation to add the `Website` facet.
+    * This could also be done automatically in a listener depending on some metadata and rules, and if the `Document.HasWebsite` operation returns `true` (see below).
 
 (*) Assuming current user is logged in and has enough rights to at least _read_ the blobs.
 
 ## The "Main" HTML File
 
-Whatever the source (a `Folderish` or a .zip), the plugin searches for a min html file using this algorithm:
+Whatever the source (a `Folderish` or a .zip), the plugin searches for a main html file using this algorithm:
 
 * Whatever the name, it must be at first level, the plugin does not search in nested folders
-* If, at first level, one file is `index.html`, the document is considered being a mini website and this file will be returned at the first peview
+* If, at first level, one file is `index.html`, the document is considered being a website and this file will be returned at the first preview
 * If there is no `index.html` file, the plugin searches for any other .html and returns the first it finds, to be used at first display
 * If there is no .html file at all at first level, the plug-in returns a 404 error.
 
@@ -53,21 +53,21 @@ Whatever the source (a `Folderish` or a .zip), the plugin searches for a min htm
 
 This means that if the source document contains at least one html document at first level, will be seen as a mini website. The preview will display the HTML, but the result is unpredictable if it is not website with relative paths for sub-elements.
 
-This is why you should use the `WebsitePreviewAvailable ` facet and add your preview only when it is relevant
+This is why you should use the `Website ` facet and add your preview only when it is relevant
 
 
 
 ## Utilities - Operation(s)
 The plugin provides the following operation(s):
 
-####    `Document.HasMinisite`
+####    `Document.HasWebsite`
 * `input` is a document
 *  `output` is the document, unchanged
-*  The operation sets the `WSP_hasMinisite` boolean Context Variable with the result:
-  *  If the Document has the `WebsitePreviewAvailable ` facet, `WSP_hasMinisite` is `true`
-  *  Else, if it is a `Folderish` document with an html child at first level, `WSP_hasMinisite` is `true`
-  *  Else, it the document has the `file` schema and `file:content` can be unzipped and contains an html file at first level, `WSP_hasMinisite` is set to ` true`
-  *  Else, `WSP_hasMinisite` is set to `false.
+*  The operation sets the `WSP_hasWebsite` boolean Context Variable with the result:
+  *  If the Document has the `Website ` facet, `WSP_hasWebsite` is set to `true`
+  *  Else, if it is a `Folderish` document with an html child at first level, `WSP_hasWebsite` is set to `true`
+  *  Else, it the document has the `file` schema and `file:content` can be unzipped and contains an html file at first level, `WSP_hasWebsite` is set to ` true`
+  *  Else, `WSP_hasWebsite` is set to `false`.
   
 
 ## Usage in WebUI
@@ -90,7 +90,12 @@ The plugin provides the following operation(s):
       }
 
     </style>
-
+    <!--
+    It is important to filter with the facet: If this element is displayed as a tab, calls to the server
+    will always be done for evey document _before_ applying WebUI filter. So, you display Root, Domain, ...
+    => The plugin is called and tries to get an index.html file.
+    This is not efficient => you should show/hide the iframe here to avoid these useless calls
+    -->
     <iframe src="/nuxeo/site/WSP/[[document.uid]]/index.html"></iframe>
 
   </template>
@@ -111,11 +116,8 @@ The plugin provides the following operation(s):
 </dom-module>
 ```
 
-* Create a Document Page _pill_ (In Studio Designer > UI)  displaying this element, with the correct filter (typically, if the document has the `WebsitePreviewAvailable` facet)
+* Create a Document Page _tab_ (In Studio Designer > UI)  displaying this element, with the correct filter (typically, if the document has the `Website` facet)
 
-## Usage in JSF UI
-
-Create an `xhtml` widget with an iframe, setting up the correct URL for the `src` attribut.
 
 
 ## WARNING About the Zip Format

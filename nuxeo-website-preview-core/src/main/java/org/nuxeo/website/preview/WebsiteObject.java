@@ -82,6 +82,8 @@ public class WebsiteObject extends DefaultObject {
             } catch (DocumentNotFoundException e) {
                 log.error("mainDocument not found", e);
             }
+        } else {
+            
         }
 
         if (response == null) {
