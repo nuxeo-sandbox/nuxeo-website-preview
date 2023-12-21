@@ -30,6 +30,7 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.nuxeo.common.Environment;
@@ -71,12 +72,20 @@ public class WebsitePreviewZip implements WebsitePreview {
         if (mainParent == null) {
             return null;
         }
-
+        
         // Get the DocumentModel
         mainHtmlDoc = session.getDocument(mainParent.getRef());
         // Assume it has the "file" schema
         Blob blob = (Blob) mainHtmlDoc.getPropertyValue("file:content");
         if (blob != null) {
+
+            // Don't loose time if it's not a zip
+            String mimeType = blob.getMimeType();
+            if(StringUtils.isBlank(mimeType) || !mimeType.equals("application/zip")) {
+                return null;
+            }
+            
+
             ZipFile zipFile = null;
             byte[] buffer = new byte[4096 * 2];
             int len = 0;
