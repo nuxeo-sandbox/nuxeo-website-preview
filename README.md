@@ -12,6 +12,11 @@ This plug-in allows to display a website stored in Nuxeo either as:
 
 **WARNING**: Please, see the _Security Warning_ below
 
+**Other WARNINGS**:
+
+* Please, see _About the `Note` document type_, below.
+* And _About the Zip Format_
+
 ## How to Use
 
 The plug-in creates a _WebEngine_ module allowing to access the embedded website _via_ a URL. The name of the module (in the URLs) is `WSP` (WebSitePreview).
@@ -143,6 +148,21 @@ mysite/img/logo.png
 mysite/index.html
 mysite/otherpage.html
 ```
+
+## About the `Note` document type
+When using the plugin to display the ocntent of a `Folderish`, we strongly recommand to make sure Nuxeo dose not create a `Note` document type for your HTML. Nuxeo may automatically strip some HTML content form the HTML, and the preview will display poorly.
+
+So, we recommend to add the following XML extension in your Studio project, to disable the creation of `Note` when you drag-drop and HTML file. It will instead create a `File`, which is good.
+
+```
+<extension target="org.nuxeo.ecm.platform.filemanager.service.FileManagerService"
+           point="plugins">
+
+  <plugin name="NoteImporter" enabled="false"/>
+
+</extension>
+```
+
 
 ## Security Warning
 The plugin sends the files as they are stored (either as single Nuxeo Document or inside the .zip file). This means no sanitizing is done, the JavaScript is not filtered and is sent as is.
