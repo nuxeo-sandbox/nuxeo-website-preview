@@ -228,7 +228,28 @@ public class WebsitePreviewFolder implements WebsitePreview {
         String path = mainParent.getPathAsString() + "/" + relativePath;
 
         DocumentModel doc = null;
-        doc = session.getDocument(new PathRef(path));
+        try {
+            doc = session.getDocument(new PathRef(path));
+        } catch (DocumentNotFoundException e) {
+            // Workaround in case the path has been truncated/recalculated by Nuxeo because too long
+            int lastIndex = path.lastIndexOf("/");
+            String parentPath = path.substring(0, lastIndex);
+            String docTitle = path.substring(lastIndex + 1);
+            // Get the parent (if error, we give up)
+            DocumentModel parent = session.getDocument(new PathRef(parentPath));
+            String nxql = "SELECT * FROM Document WHERE ecm:parentId = '" + parent.getId() + "'"
+                    + " AND dc:title = '" + docTitle + "'"
+                    + " AND ecm:mixinType != 'HiddenInNavigation' AND ecm:isProxy = 0 AND ecm:isVersion = 0 AND ecm:isTrashed = 0";
+            DocumentModelList children = session.query(nxql);
+            if(children.size() > 0) {
+                log.info("Not found at " + path + ", but found by title at " + parentPath);
+                doc = children.get(0);
+            }
+            if(doc == null) {
+                log.warn("No document found at " + path + ", nor at " + parentPath + " with a title '" + docTitle + "'.");
+                return null;
+            }
+        }
 
         blob = getBlob(doc);
         if (blob == null) {

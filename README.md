@@ -9,13 +9,15 @@ This plug-in allows to display a website stored in Nuxeo either as:
 * _Notice_: It will also display the minisite, if any, when the document is a `Folderish` whose content does not have any html file to display at first level and if this `Folderish` also have zip file in it's `file` schema.
   
 * Also, this is about _previewing_ The preview is displayed in the context of the Nuxeo application. This means, some JavaScript or access to other website, if any, may fail (typically because of CORS)
+* 
+> [!IMPORTANT]
+> Please read all the **WARNINGS** below:
+> 
+> * _Security Warning_
+> * _About the `Note` document type_
+> * _About the Zip Format_
+> * _Relative Paths and Max Length of `name`_
 
-**WARNING**: Please, see the _Security Warning_ below
-
-**Other WARNINGS**:
-
-* Please, see _About the `Note` document type_, below.
-* And _About the Zip Format_
 
 ## How to Use
 
@@ -162,6 +164,29 @@ So, we recommend to add the following XML extension in your Studio project, to d
 
 </extension>
 ```
+
+## Relative Paths and Max Length of `name`
+This warning applies only when previewing a `Folderish`and its content.
+
+In this context, make sure the relative path is valid. Nuxeo truncates/modifies the `name` (what is used in the URL) when they are too long. For example, if your file name is "my-long-file-name-for-a-js-but-like-very-very-very-long-and-could-be-longer.js", when created (or imported) Nuxeo will truncate, by default, to "my-long-file-name-for-a-" (24 chars). So, when requesting it from its full name, it will fail.
+
+You can change this value by using the `nuxeo.path.segment.maxsize` configuration parameter. Either in `nuxeo.conf`:
+
+`nuxeo.path.segment.maxsize=YOUR_VALUE`
+
+Or via XML:
+
+```
+<extension target="org.nuxeo.runtime.ConfigurationService" point="configuration">
+  <property name="nuxeo.path.segment.maxsize">YOUR_VALUE</property>
+</extension>
+```
+
+Notice the plugin tries to workaround this in a single attempt. In the previous example, if the path is...
+
+`/domain/aworkspace/afolder/yoursite/main/js/my-long-file-name-for-a-js-but-like-very-very-very-long-and-could-be-longer.js`
+
+...if Nuxeo throws a `DocumentNotFoundException`, the plugin will search inside `/domain//aworkspace/afolder/yoursite/main/js` for a Document whose `dc:title` is "my-long-file-name-for-a-js-but-like-very-very-very-long-and-could-be-longer.js".
 
 
 ## Security Warning
