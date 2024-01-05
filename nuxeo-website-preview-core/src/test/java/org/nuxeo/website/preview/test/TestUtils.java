@@ -16,14 +16,18 @@
  * Contributors:
  *     Thibaud Arguillere
  */
-package org.nuxeo.website.preview;
+package org.nuxeo.website.preview.test;
 
 import java.io.File;
+import java.io.Serializable;
 
 import org.nuxeo.common.utils.FileUtils;
+import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.impl.blob.FileBlob;
+import org.nuxeo.ecm.platform.mimetype.interfaces.MimetypeRegistry;
+import org.nuxeo.runtime.api.Framework;
 
 /**
  * @since 9.10
@@ -37,7 +41,15 @@ public class TestUtils {
 
         DocumentModel doc = inSession.createDocumentModel(inParent.getPathAsString(), f.getName(), inType);
         doc.setPropertyValue("dc:title", f.getName());
-        doc.setPropertyValue("file:content", new FileBlob(f));
+        
+        MimetypeRegistry mimeTypeService;
+        mimeTypeService = Framework.getService(MimetypeRegistry.class);
+        
+        Blob blob = new FileBlob(f);
+        String mimeType = mimeTypeService.getMimetypeFromBlob(blob);
+        blob.setMimeType(mimeType);
+        
+        doc.setPropertyValue("file:content", (Serializable) blob);
         return inSession.createDocument(doc);
 
     }

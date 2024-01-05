@@ -16,10 +16,11 @@
  * Contributors:
  *     Thibaud Arguillere
  */
-package org.nuxeo.website.preview;
+package org.nuxeo.website.preview.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import javax.inject.Inject;
 
@@ -31,20 +32,19 @@ import org.nuxeo.ecm.automation.test.AutomationFeature;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.event.EventService;
 import org.nuxeo.ecm.core.test.DefaultRepositoryInit;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
-import org.nuxeo.runtime.transaction.TransactionHelper;
+import org.nuxeo.website.preview.WebsitePreviewUtils;
 
 @RunWith(FeaturesRunner.class)
 @Features(AutomationFeature.class)
 @RepositoryConfig(init = DefaultRepositoryInit.class, cleanup = Granularity.METHOD)
 @Deploy({ "nuxeo-website-preview-core" })
-public class TestWebsitePreviewFolder {
+public class TestWebsitePreviewZip {
 
     public static final String LOGO_FILE_NAME = "NUXEO-LOGO-1.png";
 
@@ -55,9 +55,6 @@ public class TestWebsitePreviewFolder {
     @Inject
     protected CoreSession coreSession;
 
-    @Inject
-    protected EventService eventService;
-
     @Before
     public void setup() {
 
@@ -67,7 +64,6 @@ public class TestWebsitePreviewFolder {
         testDocsFolder = coreSession.saveDocument(testDocsFolder);
 
         coreSession.save();
-
     }
 
     @After
@@ -77,56 +73,74 @@ public class TestWebsitePreviewFolder {
         coreSession.save();
     }
 
-    protected DocumentModel buildWebsiteDocuments() {
-
-        // Create main parent
-        DocumentModel mainFolder = TestUtils.createFolder(coreSession, testDocsFolder, "Website");
-        // Crete the html files
-        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, mainFolder, "File", "wsp-folder/index.html");
-        doc = TestUtils.createDocumentFromFile(coreSession, mainFolder, "File", "wsp-folder/test1.html");
-        // Now the img folder and its logo
-        DocumentModel imgFolder = TestUtils.createFolder(coreSession, mainFolder, "img");
-        doc = TestUtils.createDocumentFromFile(coreSession, imgFolder, "File", "wsp-folder/img/NUXEO-LOGO-1.png");
-
-        // Save for good
-        coreSession.save();
-        TransactionHelper.commitOrRollbackTransaction();
-        TransactionHelper.startTransaction();
-
-        eventService.waitForAsyncCompletion();
-
-        return mainFolder;
-    }
-
     @Test
     public void testTypeIsWebsiteFolder() {
 
-        DocumentModel website = buildWebsiteDocuments();
-        assertNotNull(website);
+        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File",
+                "WSP-html-just-index.zip");
+        assertNotNull(doc);
 
-        assertEquals(WebsitePreviewUtils.TYPE.FOLDER, WebsitePreviewUtils.getType(coreSession, website));
+        assertEquals(WebsitePreviewUtils.TYPE.ZIP, WebsitePreviewUtils.getType(coreSession, doc));
     }
 
     @Test
-    public void testGetHtmlIndex() {
+    public void testWithSingleHtmlIndex() {
 
-        DocumentModel website = buildWebsiteDocuments();
-        assertNotNull(website);
+        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File",
+                "WSP-html-just-index.zip");
+        assertNotNull(doc);
 
-        Blob result = WebsitePreviewUtils.getMainHtmlBlob(coreSession, website);
-
+        Blob result = WebsitePreviewUtils.getMainHtmlBlob(coreSession, doc);
         assertNotNull(result);
         assertNotNull(result.getFilename());
         assertEquals("index.html", result.getFilename().toLowerCase());
     }
 
     @Test
+    public void testWithHtmlButNoIndexFile() {
+
+        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File",
+                "WSP-html-no-index-file.zip");
+        assertNotNull(doc);
+
+        Blob result = WebsitePreviewUtils.getMainHtmlBlob(coreSession, doc);
+        assertNotNull(result);
+
+    }
+
+    @Test
+    public void testWithSeveralHtmlAndIndexFile() {
+
+        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File",
+                "WSP-html-several-and-index.zip");
+        assertNotNull(doc);
+
+        Blob result = WebsitePreviewUtils.getMainHtmlBlob(coreSession, doc);
+        assertNotNull(result);
+        assertNotNull(result.getFilename());
+        assertEquals("index.html", result.getFilename().toLowerCase());
+
+    }
+
+    @Test
+    public void testWithNoHtml() {
+
+        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File", "WSP-no-html.zip");
+        assertNotNull(doc);
+
+        Blob result = WebsitePreviewUtils.getMainHtmlBlob(coreSession, doc);
+        assertNull(result);
+
+    }
+
+    @Test
     public void testgetResource() {
 
-        DocumentModel website = buildWebsiteDocuments();
-        assertNotNull(website);
+        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File",
+                "WSP-html-several-and-index.zip");
+        assertNotNull(doc);
 
-        Blob result = WebsitePreviewUtils.getResource(coreSession, website, PATH_TO_LOGO);
+        Blob result = WebsitePreviewUtils.getResource(coreSession, doc, PATH_TO_LOGO);
         assertNotNull(result);
         assertNotNull(result.getFilename());
         assertEquals(LOGO_FILE_NAME, result.getFilename());

@@ -16,7 +16,7 @@
  * Contributors:
  *     Thibaud Arguillere
  */
-package org.nuxeo.website.preview;
+package org.nuxeo.website.preview.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.Serializable;
 
 import javax.inject.Inject;
 
@@ -69,7 +70,9 @@ public class TestOperations {
         DocumentModel doc = session.createDocumentModel("/", "test", "File");
         doc.setPropertyValue("dc:title", "test");
         File f = FileUtils.getResourceFileFromContext("WSP-html-several-and-index.zip");
-        doc.setPropertyValue("file:content", new FileBlob(f));
+        Blob b = new FileBlob(f);
+        b.setMimeType("application/zip");
+        doc.setPropertyValue("file:content", (Serializable) b);
         doc = session.createDocument(doc);
         
         OperationContext ctx = new OperationContext(session);
@@ -89,7 +92,9 @@ public class TestOperations {
         DocumentModel doc = session.createDocumentModel("/", "test", "File");
         doc.setPropertyValue("dc:title", "test");
         File f = FileUtils.getResourceFileFromContext("WSP-no-html.zip");
-        doc.setPropertyValue("file:content", new FileBlob(f));
+        Blob b = new FileBlob(f);
+        b.setMimeType("application/zip");
+        doc.setPropertyValue("file:content", (Serializable) b);
         doc = session.createDocument(doc);
         
         OperationContext ctx = new OperationContext(session);
