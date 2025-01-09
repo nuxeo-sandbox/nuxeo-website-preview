@@ -18,9 +18,9 @@
  */
 package org.nuxeo.website.preview;
 
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
