@@ -1,32 +1,26 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.nuxeo</groupId>
     <artifactId>nuxeo-parent</artifactId>
     <version>2023.2</version>
   </parent>
-
   <groupId>nuxeo-website-preview</groupId>
   <artifactId>nuxeo-website-preview-parent</artifactId>
   <name>Parent Project for Nuxeo Website Preview</name>
   <version>2023.0.1-SNAPHOT</version>
-
   <packaging>pom</packaging>
-  <description />
-
+  <description/>
   <properties>
     <nuxeo.skip.enforcer>true</nuxeo.skip.enforcer>
     <nuxeo.target.version>2023.*</nuxeo.target.version>
+    <pushReleaseChanges>false</pushReleaseChanges>
   </properties>
-
   <modules>
     <module>nuxeo-website-preview-core</module>
     <module>nuxeo-website-preview-webui</module>
     <module>nuxeo-website-preview-mp</module>
   </modules>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -46,7 +40,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
   <repositories>
     <repository>
       <id>maven-public</id>
@@ -71,7 +64,6 @@
       </snapshots>
     </repository>
   </repositories>
-
   <pluginRepositories>
     <pluginRepository>
       <id>maven-public</id>
@@ -84,17 +76,43 @@
       </snapshots>
     </pluginRepository>
   </pluginRepositories>
-
-   <build>
+  <build>
     <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.3.1</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>3.3.1</version>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>3.1.1</version>
+        <configuration>
+          <projectVersionPolicyId>SemVerVersionPolicy</projectVersionPolicyId>
+          <tagNameFormat>@{project.version}</tagNameFormat>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+          <scmReleaseCommitComment>Release @{releaseLabel}</scmReleaseCommitComment>
+          <scmDevelopmentCommitComment>Post Release @{releaseLabel}</scmDevelopmentCommitComment>
+          <pushChanges>${pushReleaseChanges}</pushChanges>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.18.0</version>
+        <configuration>
+          <ruleSet/>
+        </configuration>
       </plugin>
     </plugins>
-    </pluginManagement>
   </build>
-
+  <scm>
+    <connection>scm:git:${project.scm.url}</connection>
+    <developerConnection>scm:git:${project.scm.url}</developerConnection>
+    <url>https://github.com/nuxeo-sandbox/nuxeo-website-preview</url>
+  </scm>
 </project>
