@@ -18,14 +18,13 @@
  */
 package org.nuxeo.website.preview;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -54,58 +53,26 @@ public class WebsiteObject extends DefaultObject {
     protected void initialize(Object... args) {
         super.initialize(args);
 
-        /*
+        // URL is .../WSP/1234-5678-90ab/index.html => first argument is the doc id
         String docId = (String) args[0];
         try {
             mainDocument = ctx.getCoreSession().getDocument(new IdRef(docId));
         } catch (Exception e) {
             mainDocument = null;
         }
-        */
-
-        // URL is .../WSP/1234-5678-90ab/index.html => first argument is the doc id
-        //     or .../WSP/settings/useCache/false
-        String firstArg = (String) args[0];
-        
-        if(firstArg.startsWith("settings")) {
-            // Nothing here
-        } else {
-         // Assume it is a docId
-            try {
-                mainDocument = ctx.getCoreSession().getDocument(new IdRef(firstArg));
-            } catch (Exception e) {
-                mainDocument = null;
-            }
-        }
-    }
-
-    @Path("/useCache/{useCacheValue:.*}")
-    @GET
-    public Response getSettings(@PathParam("useCacheValue") Boolean useCacheValue) {
-
-        WebsitePreviewFolder.useCache(useCacheValue);
-
-        return Response.ok().build();
     }
 
     @Path("/index.html")
     @GET
     @Produces("text/html")
-    public Response getMainHtml(@QueryParam("customIndexDocId") String customIndexDocId) {
+    public Response getMainHtml() {
 
         Response response = null;
 
         if (mainDocument != null) {
             try {
-                Blob blob = null;
-                if (StringUtils.isBlank(customIndexDocId)) {
-                    blob = WebsitePreviewUtils.getMainHtmlBlob(ctx.getCoreSession(), mainDocument);
-                } else {
-                    // URL is .../WSP/1234-5678-90ab/index.html?customIndexDocId=abcd-efg-etc
-                    blob = WebsitePreviewUtils.getCustomMainHtmlBlob(ctx.getCoreSession(), mainDocument,
-                            customIndexDocId);
-                }
 
+                Blob blob = WebsitePreviewUtils.getMainHtmlBlob(ctx.getCoreSession(), mainDocument);
                 if (blob == null) {
                     response = Response.status(Status.NOT_FOUND).build();
                 } else {
@@ -117,7 +84,7 @@ public class WebsiteObject extends DefaultObject {
                 log.error("mainDocument not found", e);
             }
         } else {
-
+            
         }
 
         if (response == null) {

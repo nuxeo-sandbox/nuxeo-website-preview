@@ -18,24 +18,13 @@
  */
 package org.nuxeo.website.preview.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.api.CoreSession;
@@ -44,23 +33,22 @@ import org.nuxeo.ecm.core.event.EventService;
 import org.nuxeo.ecm.core.test.DefaultRepositoryInit;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
-import org.nuxeo.ecm.restapi.test.BaseTest;
-import org.nuxeo.ecm.restapi.test.RestServerFeature;
+import org.nuxeo.ecm.webengine.test.WebEngineFeature;
+import org.nuxeo.http.test.CloseableHttpResponse;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.ServletContainerFeature;
-import org.nuxeo.runtime.test.runner.TransactionalFeature;
 import org.nuxeo.runtime.transaction.TransactionHelper;
-import org.nuxeo.website.preview.WebsitePreviewFolder;
+import org.nuxeo.http.test.HttpClientTestRule;
+
+import static org.junit.Assert.*;
 
 @RunWith(FeaturesRunner.class)
-@Features({ RestServerFeature.class })
+@Features({ WebEngineFeature.class })
 @RepositoryConfig(init = DefaultRepositoryInit.class, cleanup = Granularity.METHOD)
 @Deploy({ "nuxeo-website-preview-core" })
-public class TestWebsitePreviewWebEngine extends BaseTest {
-
-    public static final String BASE_URL = "http://localhost";
+public class TestWebsitePreviewWebEngine {
 
     public static final String LOGO_FILE_NAME = "NUXEO-LOGO-1.png";
 
@@ -71,14 +59,17 @@ public class TestWebsitePreviewWebEngine extends BaseTest {
     @Inject
     protected ServletContainerFeature servletContainerFeature;
 
+    @Rule
+    public final HttpClientTestRule httpClient = HttpClientTestRule.builder()
+            .url(() -> servletContainerFeature.getHttpUrl()+"/WSP/")
+            .adminCredentials()
+            .build();
+
     @Inject
     protected CoreSession coreSession;
 
     @Inject
     protected EventService eventService;
-
-    @Inject
-    protected TransactionalFeature transactionalFeature;
 
     @Before
     public void setup() {
@@ -91,36 +82,14 @@ public class TestWebsitePreviewWebEngine extends BaseTest {
 
     @After
     public void cleanup() {
-
         coreSession.removeDocument(testDocsFolder.getRef());
         coreSession.save();
-    }
-    
-    @Test
-    public void testUseCache() throws Exception {
-        
-        boolean useCache = WebsitePreviewFolder.getUseCache();
-        // Default value should be true
-        assertTrue(useCache);
-        
-        int port = servletContainerFeature.getPort();
-        String url = BASE_URL + ":" + port + "/WSP/settings/useCache/false";
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpGet request = new HttpGet(url);
-            request.setHeader(HttpHeaders.AUTHORIZATION, "Basic QWRtaW5pc3RyYXRvcjpBZG1pbmlzdHJhdG9y");
-            try (CloseableHttpResponse response = client.execute(request)) {
-                assertEquals(200, response.getStatusLine().getStatusCode());
-                useCache = WebsitePreviewFolder.getUseCache();
-                assertFalse(useCache);
-            }
-        }
     }
 
     @Test
     public void testTypeIsWebsiteFolder() throws IOException {
-
         // Testing with a zip
-        DocumentModel doc = TestUtils.createDocumentFromFile(session, testDocsFolder, "File",
+        DocumentModel doc = TestUtils.createDocumentFromFile(coreSession, testDocsFolder, "File",
                 "WSP-html-just-index.zip");
         assertNotNull(doc);
 
@@ -129,44 +98,23 @@ public class TestWebsitePreviewWebEngine extends BaseTest {
         TransactionHelper.commitOrRollbackTransaction();
         TransactionHelper.startTransaction();
 
-        //eventService.waitForAsyncCompletion();
-        transactionalFeature.nextTransaction();
-        
+        eventService.waitForAsyncCompletion();
 
         // Get the main HTML page
-        int port = servletContainerFeature.getPort();
-        String url = BASE_URL + ":" + port + "/WSP/" + doc.getId() + "/index.html";
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpGet request = new HttpGet(url);
-            // request.setHeader(HttpHeaders.CONTENT_TYPE, "text/html" /*"application/json"*/);
-            request.setHeader(HttpHeaders.AUTHORIZATION, "Basic QWRtaW5pc3RyYXRvcjpBZG1pbmlzdHJhdG9y");
-            try (CloseableHttpResponse response = client.execute(request)) {
-                assertEquals(200, response.getStatusLine().getStatusCode());
-
-                HttpEntity entity = response.getEntity();
-                assertEquals("text/html", entity.getContentType().getValue());
-                // See src/test/resources, the content of the zip
-                String resultHtml = entity != null ? EntityUtils.toString(entity) : null;
-                assertNotNull(resultHtml);
-                assertTrue(resultHtml.indexOf("<title>Website Preview Test</title>") > 0);
-            }
+        try (CloseableHttpResponse response = httpClient.buildGetRequest(doc.getId() + "/index.html").execute()) {
+            assertEquals(200, response.getStatus());
+            assertEquals("text/html", response.getType());
+            // See src/test/resources, the content of the zip
+            String resultHtml = response.getEntityString();
+            assertNotNull(resultHtml);
+            assertTrue(resultHtml.indexOf("<title>Website Preview Test</title>") > 0);
         }
 
         // Get the logo
-        url = BASE_URL + ":" + port + "/WSP/" + doc.getId() + "/" + PATH_TO_LOGO;
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpGet request = new HttpGet(url);
-            // request.setHeader(HttpHeaders.CONTENT_TYPE, "text/html" /*"application/json"*/);
-            request.setHeader(HttpHeaders.AUTHORIZATION, "Basic QWRtaW5pc3RyYXRvcjpBZG1pbmlzdHJhdG9y");
-            try (CloseableHttpResponse response = client.execute(request)) {
-
-                assertEquals(200, response.getStatusLine().getStatusCode());
-
-                HttpEntity entity = response.getEntity();
-                assertEquals("image/png", entity.getContentType().getValue());
-            }
+        try (CloseableHttpResponse response = httpClient.buildGetRequest(doc.getId() + "/" + PATH_TO_LOGO).execute()) {
+            assertEquals(200, response.getStatus());
+            assertEquals("image/png", response.getType());
         }
-
     }
 
 }
