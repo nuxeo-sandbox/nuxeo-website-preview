@@ -24,15 +24,15 @@ This plug-in allows to display a website stored in Nuxeo either as:
 The plug-in creates a _WebEngine_ module allowing to access the embedded website _via_ a URL. The name of the module (in the URLs) is `WSP` (WebSitePreview).
 
 * In order to be as easy possible to use, the main url _must_ end with `index.html`, _whatever the real name of your main html file_.
-
-* So, to access the preview(*), the URL to use is:
-    `{server:port}/nuxeo/site/WSP/main-parent-doc-id/index.html`
-   
-    This URL will typically be used in the UI using an `iframe`
-
-* For example, say you have a _Folderish_ document, named "My Site", whose `id` is `1234-5678-9ABC-DEF0`, and you are testing on your localhost, you can display the preview using this URL: `http://localhost:8080/nuxeo/site/WSP/1234-5678-9ABC-DEF0/index.html`.
-
-  The exact same URL is used if instead of a `Folderish` containing all the website as Nuxeo documents, it is a `File` whose `file:content` holds a zip containing the website
+* So, to access the preview(*), the URL to use (typically in an iFrame) is:
+  * `{server:port}/nuxeo/site/WSP/main-parent-doc-id/index.html`
+  * See below "Using a Custom Virtual index.html Document", the URL can also be (works only for Folderish document):
+    * `{server:port}/nuxeo/site/WSP/main-parent-doc-id/index.html/index.html?customIndexDocId=the-html-doc-to-display`
+* For example, say you have a _Folderish_ document, named "My Site", whose `id` is `1234-5678-9abc-def0`, and you are testing on your localhost:
+  * You can display the preview using this URL: `http://localhost:8080/nuxeo/site/WSP/1234-5678-9abc-def0/index.html`.
+    * The exact same URL is used if instead of a `Folderish` containing all the website as Nuxeo documents, it is a `File` whose `file:content` holds a zip containing the website
+  * To display a custom document whose UID is fedc-ba09-8765-4321 instead of what the plugin finds for "index.html" (see below):
+    `http://localhost:8080/nuxeo/site/WSP/1234-5678-9abc-def0/index.html?customIndexDocId=fedc-ba09-8765-4321`
 
 * The plugin contributes the `Website` facet:
   * Because not every `Folderish` and not every .zip host a website 
@@ -45,7 +45,7 @@ The plug-in creates a _WebEngine_ module allowing to access the embedded website
 
 ## The "Main" HTML File
 
-Whatever the source (a `Folderish` or a .zip), the plugin searches for a main html file using this algorithm:
+Whatever the source (a `Folderish` or a .zip), the plugin searches by default for a "main" html file using this algorithm:
 
 * Whatever the name, it must be at first level, the plugin does not search in nested folders
 * If, at first level, one file is `index.html`, the document is considered being a website and this file will be returned at the first preview
@@ -56,7 +56,16 @@ Whatever the source (a `Folderish` or a .zip), the plugin searches for a main ht
 
 This means that if the source document contains at least one html document at first level, will be seen as a mini website. The preview will display the HTML, but the result is unpredictable if it is not website with relative paths for sub-elements.
 
-This is why you should use the `Website ` facet and add your preview only when it is relevant
+This is why you should use the `Website` facet and add your preview only when it is relevant
+
+
+### Using a Custom Virtual index.html Document
+It is possible, though, to tell the plugin to bypass this search for a "Main" HTML file and tell it to use a specific document to display:
+
+* There is a still a requirement to pass an existing parent folder ID as first element of the path
+* Add the `customIndexDocId` query parameter with a valid UID of a document whose file:content is html.
+
+`{server:port}/nuxeo/site/WSP/main-parent-doc-id/index.html/index.html?customIndexDocId=html-doc-id-to-display`
 
 
 
@@ -74,10 +83,12 @@ The plugin provides the following operation(s):
   
 
 ## Usage in WebUI
+
+### Default Behavior (Using "index.html")
 * First, create an element (in Studio Designer > Resources) with an iframe and set the src of the iframe to the correct url. For example:
 
 
-```
+```html
 <dom-module id="my-website-preview">
   <template>
     <style>
@@ -120,6 +131,74 @@ The plugin provides the following operation(s):
 ```
 
 * Create a Document Page _tab_ (In Studio Designer > UI)  displaying this element, with the correct filter (typically, if the document has the `Website` facet)
+
+### Using a Custom Index Document
+
+* Just change the iFram URL in the element, using the `parentRef` property of the `document`:
+
+```html
+. . .
+  <iframe src="/nuxeo/site/WSP/[[document.parentRef]]/index.html?customIndexDocId=[[document.uid]]"></iframe>"
+. . .
+```
+
+### Handling both cases in a single element
+
+```html
+<dom-module id="my-website-preview">
+  <template>
+    <style>
+      *[role=widget] {
+        padding: 5px;
+      }
+
+      iframe {
+        position: absolute;
+        width: 95%;
+        height: 90%;
+        border: 2 2 2 2;
+      }
+    </style>
+
+    <!--
+    It is important to filter with the facet: If this element is displayed as a tab, calls to the server
+    will always be done for evey document _before_ applying WebUI filter. So, you display Root, Domain, ...
+    => The plugin is called and tries to get an index.html file.
+    This is not efficient => you should show/hide the iframe here to avoid these useless calls
+    -->
+    <iframe src="[[wspUrl]]"></iframe>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'my-website-preview',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        document: {
+          type: Object,
+          observer: "_documentChanged"
+        },
+        wspUrl: String
+      },
+
+      _documentChanged: function(newDoc) {
+        let url = "";
+        if(newDoc) {
+          if(this.hasFacet(newDoc, "Folderish")) {
+            url = "/nuxeo/site/WSP/" + this.document.uid + "/index.html";
+          } else {
+            url = "/nuxeo/site/WSP/" + this.document.parentRef + "/index.html?customIndexDocId=" + this.document.uid;
+          }
+        }
+        this.wspUrl = url;
+      }
+
+    });
+  </script>
+</dom-module>
+```
+
 
 
 
@@ -195,6 +274,13 @@ The plugin sends the files as they are stored (either as single Nuxeo Document o
 If there is any risk of a user uploading a website that contains some malicious JavaScript (like getting the cookies to steel the session), then we recommend to add configuration to approve/reject the document before making it available.
 
 The plugin could also be forked and sanitizing the JavaScript can be done (Nuxeo has APIs for this purpose). This means the plugin would then send html files that contain no `<script>` tag at all for example.
+
+## Settings and Cache and Troubleshooting
+When displaying website from a folde,r the plugin uses an internal, in memory, cache to avoid searching/NXQL all the time for the same files.
+
+This can be an issue during testing, so if you change your test document and don't see what you are expecting, you can disable the cache with this request:
+
+`/nuxeo/site/WSP/settings/useCache/false`
 
 
 ## Support

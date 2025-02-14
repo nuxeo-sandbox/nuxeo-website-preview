@@ -19,6 +19,7 @@
 package org.nuxeo.website.preview.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -49,7 +50,9 @@ import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.ServletContainerFeature;
+import org.nuxeo.runtime.test.runner.TransactionalFeature;
 import org.nuxeo.runtime.transaction.TransactionHelper;
+import org.nuxeo.website.preview.WebsitePreviewFolder;
 
 @RunWith(FeaturesRunner.class)
 @Features({ RestServerFeature.class })
@@ -74,6 +77,9 @@ public class TestWebsitePreviewWebEngine extends BaseTest {
     @Inject
     protected EventService eventService;
 
+    @Inject
+    protected TransactionalFeature transactionalFeature;
+
     @Before
     public void setup() {
         testDocsFolder = coreSession.createDocumentModel("/", "testWSP", "Folder");
@@ -89,6 +95,26 @@ public class TestWebsitePreviewWebEngine extends BaseTest {
         coreSession.removeDocument(testDocsFolder.getRef());
         coreSession.save();
     }
+    
+    @Test
+    public void testUseCache() throws Exception {
+        
+        boolean useCache = WebsitePreviewFolder.getUseCache();
+        // Default value should be true
+        assertTrue(useCache);
+        
+        int port = servletContainerFeature.getPort();
+        String url = BASE_URL + ":" + port + "/WSP/settings/useCache/false";
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpGet request = new HttpGet(url);
+            request.setHeader(HttpHeaders.AUTHORIZATION, "Basic QWRtaW5pc3RyYXRvcjpBZG1pbmlzdHJhdG9y");
+            try (CloseableHttpResponse response = client.execute(request)) {
+                assertEquals(200, response.getStatusLine().getStatusCode());
+                useCache = WebsitePreviewFolder.getUseCache();
+                assertFalse(useCache);
+            }
+        }
+    }
 
     @Test
     public void testTypeIsWebsiteFolder() throws IOException {
@@ -103,7 +129,9 @@ public class TestWebsitePreviewWebEngine extends BaseTest {
         TransactionHelper.commitOrRollbackTransaction();
         TransactionHelper.startTransaction();
 
-        eventService.waitForAsyncCompletion();
+        //eventService.waitForAsyncCompletion();
+        transactionalFeature.nextTransaction();
+        
 
         // Get the main HTML page
         int port = servletContainerFeature.getPort();
@@ -113,7 +141,6 @@ public class TestWebsitePreviewWebEngine extends BaseTest {
             // request.setHeader(HttpHeaders.CONTENT_TYPE, "text/html" /*"application/json"*/);
             request.setHeader(HttpHeaders.AUTHORIZATION, "Basic QWRtaW5pc3RyYXRvcjpBZG1pbmlzdHJhdG9y");
             try (CloseableHttpResponse response = client.execute(request)) {
-
                 assertEquals(200, response.getStatusLine().getStatusCode());
 
                 HttpEntity entity = response.getEntity();

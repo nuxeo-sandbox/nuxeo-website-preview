@@ -40,7 +40,7 @@ public interface WebsitePreview {
      * @return
      * @since 9.10
      */
-    Blob getMainHtmlBlob() throws DocumentNotFoundException;
+    Blob getMainHtmlBlob(String customDocId) throws DocumentNotFoundException;
 
     /**
      * Retrieves a blob based on its relative path from the main document, returns null if not found.

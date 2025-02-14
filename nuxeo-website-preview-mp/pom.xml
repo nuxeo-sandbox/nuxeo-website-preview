@@ -26,10 +26,6 @@
       <groupId>nuxeo-website-preview</groupId>
       <artifactId>nuxeo-website-preview-core</artifactId>
     </dependency>
-    <dependency>
-      <groupId>nuxeo-website-preview</groupId>
-      <artifactId>nuxeo-website-preview-webui</artifactId>
-    </dependency>
   </dependencies>
 
   <build>

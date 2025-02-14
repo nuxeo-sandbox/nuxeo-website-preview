@@ -26,6 +26,7 @@ import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentNotFoundException;
+import org.nuxeo.ecm.core.api.IdRef;
 
 /**
  * @since 7.3
@@ -55,12 +56,28 @@ public class WebsitePreviewUtils {
 
         if (doc.isFolder()) {
             WebsitePreviewFolder wspFolder = new WebsitePreviewFolder(session, doc);
-            mainBlob = wspFolder.getMainHtmlBlob();
+            mainBlob = wspFolder.getMainHtmlBlob(null);
         }
 
         if (mainBlob == null && doc.hasSchema("file")) {
             WebsitePreviewZip wspZip = new WebsitePreviewZip(session, doc);
-            mainBlob = wspZip.getMainHtmlBlob();
+            mainBlob = wspZip.getMainHtmlBlob(null);
+        }
+
+        return mainBlob;
+    }
+    
+    public static Blob getCustomMainHtmlBlob(CoreSession session, DocumentModel doc, String customDocId) throws DocumentNotFoundException {
+
+        Blob mainBlob = null;
+
+        if (doc.isFolder()) {
+            WebsitePreviewFolder wspFolder = new WebsitePreviewFolder(session, doc);
+            mainBlob = wspFolder.getMainHtmlBlob(customDocId);
+        }
+
+        if (mainBlob == null && doc.hasSchema("file")) {
+            throw new UnsupportedOperationException("Custom index doc ID not supported for website stored in Zip blob, only Folderish documents");
         }
 
         return mainBlob;
@@ -123,7 +140,7 @@ public class WebsitePreviewUtils {
 
         if (doc.isFolder()) {
             WebsitePreviewFolder wspFolder = new WebsitePreviewFolder(session, doc);
-            mainBlob = wspFolder.getMainHtmlBlob();
+            mainBlob = wspFolder.getMainHtmlBlob(null);
             if (mainBlob != null) {
                 return TYPE.FOLDER;
             }
@@ -131,7 +148,7 @@ public class WebsitePreviewUtils {
 
         if (doc.hasSchema("file")) {
             WebsitePreviewZip wspZip = new WebsitePreviewZip(session, doc);
-            mainBlob = wspZip.getMainHtmlBlob();
+            mainBlob = wspZip.getMainHtmlBlob(null);
             if (mainBlob != null) {
                 return TYPE.ZIP;
             }

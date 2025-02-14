@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.nuxeo.ecm.core.api.Blob;
@@ -34,6 +35,7 @@ import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.api.DocumentNotFoundException;
+import org.nuxeo.ecm.core.api.IdRef;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.runtime.api.Framework;
@@ -52,6 +54,10 @@ public class WebsitePreviewFolder implements WebsitePreview {
 
     // Caching, to avoid doing too many NXQL.
     protected static LinkedHashMap<String, DocumentModel> parentIdAndMainHtml = new LinkedHashMap<>();
+    
+    // But caching stays optional
+    // WARNING: cach is static => not using it for one WebsitePreviewFolder => not using it for all
+    protected static boolean useCache = true;
 
     protected CoreSession session;
 
@@ -60,6 +66,22 @@ public class WebsitePreviewFolder implements WebsitePreview {
     public WebsitePreviewFolder(CoreSession session, DocumentModel mainDoc) {
         this.session = session;
         mainParent = mainDoc;
+    }
+    
+    public static void useCache(boolean value) {
+        if(useCache != value) {
+            useCache = value;
+            
+            if(!useCache) {
+                synchronized (parentIdAndMainHtml) {
+                    parentIdAndMainHtml = new LinkedHashMap<>();
+                }
+            }
+        }
+    }
+    
+    public static boolean getUseCache() {
+        return useCache;
     }
 
     /**
@@ -85,7 +107,7 @@ public class WebsitePreviewFolder implements WebsitePreview {
      * @since 9.10
      */
     @Override
-    public Blob getMainHtmlBlob() throws DocumentNotFoundException {
+    public Blob getMainHtmlBlob(String customDocId) throws DocumentNotFoundException {
 
         DocumentModel mainHtmlDoc = null;
 
@@ -105,7 +127,6 @@ public class WebsitePreviewFolder implements WebsitePreview {
                 }
                 for (String oneKey : keys) {
                     parentIdAndMainHtml.remove(oneKey);
-
                 }
             }
         }
@@ -125,38 +146,44 @@ public class WebsitePreviewFolder implements WebsitePreview {
                 // again
                 mainHtmlDoc = parentIdAndMainHtml.get(mainParent.getId());
                 if (mainHtmlDoc == null) {
-                    // Must find a .html file in first children
-                    String nxql = "SELECT * FROM Document WHERE ecm:parentId = '" + mainParent.getId() + "'"
-                            + " AND (content/mime-type ILIKE '%html' OR content/name ILIKE '%html' OR content/name ILIKE '%htm'"
-                            + " OR note:mime_type = 'text/html')"
-                            + " AND ecm:mixinType != 'HiddenInNavigation' AND ecm:isProxy = 0 AND ecm:isVersion = 0 AND ecm:isTrashed = 0";
-                    DocumentModelList children = session.query(nxql);
-
-                    if (children.size() == 1) {
-                        mainHtmlDoc = children.get(0);
-                    } else {
-                        String fileName;
-                        Blob mainBlob;
-                        for (DocumentModel child : children) {
-
-                            mainHtmlDoc = child;
-                            /*
-                             * Because of the NXQL we did, we know we have:
-                             * - An html blob
-                             * - Or an html note. In this case, the document title must be index.html
-                             */
-                            if (child.hasSchema("file")) {
-                                mainBlob = (Blob) child.getPropertyValue("file:content");
-                                fileName = mainBlob.getFilename();
-                            } else if (child.hasSchema("note")) {
-                                fileName = mainHtmlDoc.getTitle();
-                            } else {
-                                fileName = "";
-                            }
-                            if (fileName.toLowerCase().indexOf("index.html") == 0) {
-                                break;
+                    
+                    if(StringUtils.isBlank(customDocId)) {
+                    
+                        // Must find a .html file in first children
+                        String nxql = "SELECT * FROM Document WHERE ecm:parentId = '" + mainParent.getId() + "'"
+                                + " AND (content/mime-type ILIKE '%html' OR content/name ILIKE '%html' OR content/name ILIKE '%htm'"
+                                + " OR note:mime_type = 'text/html')"
+                                + " AND ecm:mixinType != 'HiddenInNavigation' AND ecm:isProxy = 0 AND ecm:isVersion = 0 AND ecm:isTrashed = 0";
+                        DocumentModelList children = session.query(nxql);
+    
+                        if (children.size() == 1) {
+                            mainHtmlDoc = children.get(0);
+                        } else {
+                            String fileName;
+                            Blob mainBlob;
+                            for (DocumentModel child : children) {
+    
+                                mainHtmlDoc = child;
+                                /*
+                                 * Because of the NXQL we did, we know we have:
+                                 * - An html blob
+                                 * - Or an html note. In this case, the document title must be index.html
+                                 */
+                                if (child.hasSchema("file")) {
+                                    mainBlob = (Blob) child.getPropertyValue("file:content");
+                                    fileName = mainBlob.getFilename();
+                                } else if (child.hasSchema("note")) {
+                                    fileName = mainHtmlDoc.getTitle();
+                                } else {
+                                    fileName = "";
+                                }
+                                if (fileName.toLowerCase().indexOf("index.html") == 0) {
+                                    break;
+                                }
                             }
                         }
+                    } else {
+                        mainHtmlDoc = session.getDocument(new IdRef(customDocId));
                     }
                 } else {
                     // We need to reload the document. Cannot use mainHtml.refresh(), because
@@ -165,7 +192,9 @@ public class WebsitePreviewFolder implements WebsitePreview {
                     mainHtmlDoc = session.getDocument(mainHtmlDoc.getRef());
                 }
                 if (mainHtmlDoc != null) {
-                    parentIdAndMainHtml.put(mainParent.getId(), mainHtmlDoc);
+                    if(useCache) {
+                        parentIdAndMainHtml.put(mainParent.getId(), mainHtmlDoc);
+                    }
                 }
             }
         }

@@ -62,7 +62,7 @@ public class WebsitePreviewZip implements WebsitePreview {
     }
 
     @Override
-    public Blob getMainHtmlBlob() throws DocumentNotFoundException {
+    public Blob getMainHtmlBlob(String customDocId) throws DocumentNotFoundException {
 
         // throw new UnsupportedOperationException();
         Blob mainHtmlBlob = null;
