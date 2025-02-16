@@ -15,7 +15,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v4
@@ -42,7 +42,9 @@ jobs:
           ]
 
     - name: Install OS dependencies
-      run: sudo apt-get -y install imagemagick ffmpeg exiftool
+      run: |
+        sudo apt-get update 
+        sudo apt-get -y install imagemagick ffmpeg exiftool
 
     - name: Build with Maven
       run: mvn -B install --file pom.xml -DskipDocker=true
